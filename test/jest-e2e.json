@@ -1,0 +1,20 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testSequencer": "<rootDir>/jest-e2e-sequencer.js",
+  "testMatch": ["<rootDir>/[0-9][0-9]-*.e2e-spec.ts"],
+  "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+  "testTimeout": 120000,
+  "maxWorkers": 1,
+  "verbose": true,
+  "setupFilesAfterEnv": [
+    "<rootDir>/jest-e2e-load-env.ts",
+    "<rootDir>/jest-e2e-setup.ts"
+  ],
+  "moduleNameMapper": {
+    "@common/(.*)": "<rootDir>/../src/common/$1",
+    "@config/(.*)": "<rootDir>/../src/config/$1",
+    "@modules/(.*)": "<rootDir>/../src/modules/$1"
+  }
+}

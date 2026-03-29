@@ -1,0 +1,4073 @@
+{
+  "info": {
+    "name": "Orchid Life CRM API",
+    "description": "NestJS REST API for Titan PB CRM (PB-CRM).\n\n**Two local services:**\n- **CRM API:** `http://localhost:3000/api/v1` (`npm run start:dev`).\n- **Supabase Auth (sign-in):** `http://localhost:54321` — this is the Supabase CLI API port (GoTrue). Login is **not** implemented on :3000; the Nest app only validates JWTs.\n\nUse **`supabase start`** locally and paste **anon / service_role** keys from `supabase status`. For **hosted** Supabase only, edit Auth request URLs to `https://YOUR_PROJECT.supabase.co` (same paths `/auth/v1/...`).\n\n**Preferred:** **Auth (CRM API) → Login** (`/auth/login`). **First super_admin:** set `BOOTSTRAP_ADMIN_SECRET` in `.env`, then **Bootstrap first super_admin** (`POST /auth/bootstrap-admin`) once (409 if already done). Variable `bootstrapAdminSecret` in Postman must match.\n\n**Auth (local Supabase)** is optional.\n\n**Sign in (Supabase folder):** `supabaseAnonKey`, `authEmail`, `authPassword`.\n\n**IDs:** From API responses.\n\n**Upload:** form-data `file`, `booking_id`, `type` (`DocType` in code).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "apiProtocol",
+      "value": "http"
+    },
+    {
+      "key": "apiHost",
+      "value": "localhost"
+    },
+    {
+      "key": "apiPort",
+      "value": "3000"
+    },
+    {
+      "key": "supabaseAuthOrigin",
+      "value": "http://localhost:54321"
+    },
+    {
+      "key": "supabaseAnonKey",
+      "value": ""
+    },
+    {
+      "key": "supabaseServiceRoleKey",
+      "value": ""
+    },
+    {
+      "key": "authEmail",
+      "value": "admin@gmail.com"
+    },
+    {
+      "key": "authPassword",
+      "value": "admin1234"
+    },
+    {
+      "key": "bootstrapAdminSecret",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "lastCreatedAuthUserId",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "unitId",
+      "value": "00000000-0000-4000-8000-000000000002"
+    },
+    {
+      "key": "formTemplateId",
+      "value": "00000000-0000-4000-8000-000000000003"
+    },
+    {
+      "key": "agreementTemplateId",
+      "value": "00000000-0000-4000-8000-000000000004"
+    },
+    {
+      "key": "bookingId",
+      "value": "00000000-0000-4000-8000-000000000005"
+    },
+    {
+      "key": "paymentId",
+      "value": "00000000-0000-4000-8000-000000000006"
+    },
+    {
+      "key": "documentId",
+      "value": "00000000-0000-4000-8000-000000000007"
+    },
+    {
+      "key": "notificationId",
+      "value": "00000000-0000-4000-8000-000000000008"
+    },
+    {
+      "key": "userId",
+      "value": "00000000-0000-4000-8000-000000000009"
+    },
+    {
+      "key": "managerId",
+      "value": "00000000-0000-4000-8000-00000000000a"
+    },
+    {
+      "key": "fieldId",
+      "value": "00000000-0000-4000-8000-00000000000b"
+    },
+    {
+      "key": "fieldId2",
+      "value": "00000000-0000-4000-8000-0000000000c0"
+    },
+    {
+      "key": "sectionId",
+      "value": "00000000-0000-4000-8000-00000000000c"
+    },
+    {
+      "key": "managerProjectId",
+      "value": "00000000-0000-4000-8000-00000000000d"
+    },
+    {
+      "key": "profileId",
+      "value": "00000000-0000-4000-8000-00000000000e"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth (local Supabase)",
+      "description": "Targets **`http://localhost:54321`** (Supabase CLI). Use anon/service keys from `supabase status`. Not the CRM server (:3000). For cloud-only, change each URL host to `https://YOUR_REF.supabase.co`.",
+      "item": [
+        {
+          "name": "Sign in (password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseAnonKey}}",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:54321/auth/v1/token?grant_type=password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "54321",
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST to **local GoTrue** (`:54321`), not Nest. Tests save `accessToken` / `refreshToken`. User must exist in Auth + `profiles` for CRM."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.access_token) pm.collectionVariables.set('accessToken', j.access_token);",
+                  "  if (j.refresh_token) pm.collectionVariables.set('refreshToken', j.refresh_token);",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseAnonKey}}",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:54321/auth/v1/token?grant_type=refresh_token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "54321",
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "refresh_token"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Uses `refreshToken` variable. Tests update `accessToken` when present."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.access_token) pm.collectionVariables.set('accessToken', j.access_token);",
+                  "  if (j.refresh_token) pm.collectionVariables.set('refreshToken', j.refresh_token);",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sign up (password, anon)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseAnonKey}}",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:54321/auth/v1/signup",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "54321",
+              "path": [
+                "auth",
+                "v1",
+                "signup"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Only works if your Supabase project allows public sign-up. Prefer **Invite manager/user** or **Create auth user (service role)** for CRM onboarding."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.access_token) pm.collectionVariables.set('accessToken', j.access_token);",
+                  "  if (j.refresh_token) pm.collectionVariables.set('refreshToken', j.refresh_token);",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create auth user (service role, bootstrap)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseServiceRoleKey}}",
+                "type": "string"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabaseServiceRoleKey}}",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:54321/auth/v1/admin/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "54321",
+              "path": [
+                "auth",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.superadmin@example.com\",\n  \"password\": \"Bootstrap_Strong_Pass_2026!\",\n  \"email_confirm\": true,\n  \"user_metadata\": {\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "**Service role only.** Creates the Auth user (e.g. first super_admin). Then in Supabase SQL/Table Editor: insert or update `profiles` with `id` = returned user id and `role` = `super_admin` (or your workflow). Never expose service_role key in client apps."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.id) pm.collectionVariables.set('lastCreatedAuthUserId', j.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth (CRM API)",
+      "description": "Login via Nest (`POST /auth/login`) — same Supabase credentials; tokens apply to all other CRM requests.",
+      "item": [
+        {
+          "name": "Login (email + password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Returns `{ success, data: { access_token, refresh_token, user, profile } }`. Tests store tokens in collection variables."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.data && j.data.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  }",
+                  "  if (j.data && j.data.refresh_token) {",
+                  "    pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "  }",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/refresh",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.data && j.data.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  }",
+                  "  if (j.data && j.data.refresh_token) {",
+                  "    pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "  }",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bootstrap first super_admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/bootstrap-admin",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "bootstrap-admin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bootstrap_secret\": \"{{bootstrapAdminSecret}}\",\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"first_name\": \"Super\",\n  \"last_name\": \"Admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requires `BOOTSTRAP_ADMIN_SECRET` in API `.env`. Fails with 409 if a super_admin already exists. Saves tokens like Login."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j.data && j.data.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  }",
+                  "  if (j.data && j.data.refresh_token) {",
+                  "    pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "  }",
+                  "} catch (e) { /* ignore */ }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Meta (localhost)",
+      "description": "Utility routes on the same dev server (`http://localhost:3000`). Open Swagger in a browser to browse all operations.",
+      "item": [
+        {
+          "name": "Swagger UI (open in browser)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/docs",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "docs"
+              ]
+            },
+            "description": "HTML UI for OpenAPI. Default: `http://localhost:3000/api/docs` while `npm run start:dev` is running."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "List projects (paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects?page=1&limit=20",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My projects (RPC)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects/my",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Project stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects/{{projectId}}/stats",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get project by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects/{{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Orchid Life Towers\",\n  \"rera_number\": \"PRM/KA/RERA/1251/446/PR/151223/006487\",\n  \"rera_website\": \"https://rera.karnataka.gov.in\",\n  \"plan_sanction_no\": \"BDA/2024/PLAN/8821\",\n  \"land_area_guntas\": 120,\n  \"total_units\": 240,\n  \"total_towers\": 3,\n  \"possession_date\": \"2027-12-31\",\n  \"address\": \"Whitefield Main Road, Bangalore\",\n  \"city\": \"Bengaluru\",\n  \"vendor_name\": \"Sample Vendor Pvt Ltd\",\n  \"vendor_pan\": \"AABCV1234C\",\n  \"vendor_address\": \"MG Road, Bengaluru\",\n  \"vendor_phone\": \"+919876543210\",\n  \"vendor_email\": \"vendor@example.com\",\n  \"vendor_rep_name\": \"R. Kumar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects/{{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Bengaluru Urban\",\n  \"vendor_phone\": \"+919811122233\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Soft-delete project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/projects/{{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profiles",
+      "item": [
+        {
+          "name": "Current user (me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "me"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Arjun\",\n  \"last_name\": \"Mehta\",\n  \"phone\": \"+919988776655\",\n  \"communication_address\": \"12 MG Road, Bengaluru 560001\",\n  \"pan_no\": \"ABCDE1234F\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List managers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/managers",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "managers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List profiles (super_admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles?page=1&limit=20&role=user&is_active=true&search=mehta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "role",
+                  "value": "user"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true"
+                },
+                {
+                  "key": "search",
+                  "value": "mehta"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get profile by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/{{profileId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profileId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update profile role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/{{profileId}}/role",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profileId}}",
+                "role"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Assign manager to user",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/{{profileId}}/assign-manager",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profileId}}",
+                "assign-manager"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": \"{{managerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Deactivate profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/profiles/{{profileId}}/deactivate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profileId}}",
+                "deactivate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Invite manager (CRM)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/invitations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "invitations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.manager@example.com\",\n  \"role\": \"manager\",\n  \"first_name\": \"Priya\",\n  \"last_name\": \"Shah\",\n  \"phone\": \"+919922334455\",\n  \"project_ids\": [\n    \"{{projectId}}\"\n  ],\n  \"manager_id\": \"{{managerId}}\",\n  \"notes\": \"Assigned to project\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requires `super_admin` JWT. Creates invitation + profile path per API; `role` is `manager`. Optional `project_ids`, `manager_id`."
+          }
+        },
+        {
+          "name": "Invite standard user (CRM)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/invitations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "invitations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales.user@example.com\",\n  \"role\": \"user\",\n  \"first_name\": \"Rahul\",\n  \"last_name\": \"Verma\",\n  \"phone\": \"+919933445566\",\n  \"project_ids\": [\n    \"{{projectId}}\"\n  ],\n  \"manager_id\": \"{{managerId}}\",\n  \"notes\": \"Field sales — sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requires `super_admin` JWT. `role` is `user`. Link to a manager via `manager_id` when applicable."
+          }
+        },
+        {
+          "name": "Assign user to project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users/{{userId}}/project-assignments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "project-assignments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{projectId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove project assignment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users/{{userId}}/project-assignments/{{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "project-assignments",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign manager to user (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users/{{userId}}/manager",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "manager"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": \"{{managerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Users directory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users-directory?page=1&limit=20&role=manager&is_active=true",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users-directory"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "role",
+                  "value": "manager"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Project user summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/projects/{{projectId}}/user-summary",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "projects",
+                "{{projectId}}",
+                "user-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Revoke user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users/{{userId}}/revoke",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "revoke"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Role change — access no longer needed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reactivate user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/admin/users/{{userId}}/reactivate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "reactivate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Manager projects",
+      "item": [
+        {
+          "name": "List assignments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/manager-projects?manager_id={{managerId}}&project_id={{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "manager-projects"
+              ],
+              "query": [
+                {
+                  "key": "manager_id",
+                  "value": "{{managerId}}"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create assignment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/manager-projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "manager-projects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": \"{{managerId}}\",\n  \"project_id\": \"{{projectId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete assignment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/manager-projects/{{managerProjectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "manager-projects",
+                "{{managerProjectId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Units",
+      "item": [
+        {
+          "name": "Unit matrix",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units/matrix?project_id={{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units",
+                "matrix"
+              ],
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List units",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units?page=1&limit=20&project_id={{projectId}}&tower=A&unit_type=3bhk&status=available",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "tower",
+                  "value": "A"
+                },
+                {
+                  "key": "unit_type",
+                  "value": "3bhk"
+                },
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk create units",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units/bulk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units",
+                "bulk"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"units\": [\n    {\n      \"project_id\": \"{{projectId}}\",\n      \"unit_no\": \"A-101\",\n      \"tower\": \"A\",\n      \"floor_no\": 1,\n      \"unit_type\": \"3bhk\",\n      \"carpet_area_sqft\": 1450,\n      \"super_built_up_sqft\": 1820,\n      \"balcony_area_sqft\": 120,\n      \"no_of_parking\": 2,\n      \"facing\": \"East\",\n      \"basic_rate_per_sqft\": 7200,\n      \"basic_sale_value\": 13104000,\n      \"gst_amount\": 655200,\n      \"maintenance_24mo\": 120000,\n      \"corpus_fund\": 85000,\n      \"other_charges\": 45000,\n      \"gross_apartment_value\": 13999200,\n      \"undivided_share_sqft\": 450,\n      \"undivided_share_fraction\": \"450/24000\",\n      \"remarks\": \"Corner unit\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get unit",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units/{{unitId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units",
+                "{{unitId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create unit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{projectId}}\",\n  \"unit_no\": \"B-204\",\n  \"tower\": \"B\",\n  \"floor_no\": 2,\n  \"unit_type\": \"2bhk\",\n  \"carpet_area_sqft\": 1180,\n  \"super_built_up_sqft\": 1490,\n  \"basic_rate_per_sqft\": 6950,\n  \"basic_sale_value\": 8201000,\n  \"gst_amount\": 410050,\n  \"facing\": \"North\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update unit",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/units/{{unitId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "units",
+                "{{unitId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Hold for VIP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Form templates",
+      "item": [
+        {
+          "name": "List templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates?page=1&limit=20&project_id={{projectId}}&is_active=true",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{projectId}}\",\n  \"name\": \"Booking form v1\",\n  \"description\": \"Standard allotment questionnaire\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List sections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/sections",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "sections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create section",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/sections",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "sections"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section_label\": \"Applicant details\",\n  \"section_key\": \"applicant_details\",\n  \"display_order\": 0,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch section",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/sections/{{sectionId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "sections",
+                "{{sectionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section_label\": \"Primary applicant\",\n  \"display_order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete section",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/sections/{{sectionId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "sections",
+                "{{sectionId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List fields",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields?page=1&limit=50&section_id={{sectionId}}&is_active=true",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "section_id",
+                  "value": "{{sectionId}}"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section_id\": \"{{sectionId}}\",\n  \"field_key\": \"applicant_full_name\",\n  \"field_label\": \"Full name\",\n  \"data_type\": \"text\",\n  \"is_required\": true,\n  \"visible_to_user\": true,\n  \"editable_by_user\": true,\n  \"display_order\": 0,\n  \"placeholder\": \"As per PAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reorder fields",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields/reorder",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields",
+                "reorder"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"id\": \"{{fieldId}}\",\n      \"display_order\": 0\n    },\n    {\n      \"id\": \"{{fieldId2}}\",\n      \"display_order\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Toggle field flags",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields/{{fieldId}}/toggle",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields",
+                "{{fieldId}}",
+                "toggle"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visible_to_user\": true,\n  \"editable_by_user\": false,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update field",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields/{{fieldId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields",
+                "{{fieldId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field_label\": \"Applicant full name (as per ID)\",\n  \"help_text\": \"Must match KYC\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete field",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}/fields/{{fieldId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}",
+                "fields",
+                "{{fieldId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get template detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch template",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Booking form v1.1\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete template",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/form-templates/{{formTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "form-templates",
+                "{{formTemplateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agreement templates",
+      "item": [
+        {
+          "name": "List agreement templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/agreement-templates?page=1&limit=20&project_id={{projectId}}&is_active=true",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "agreement-templates"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get agreement template",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/agreement-templates/{{agreementTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "agreement-templates",
+                "{{agreementTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create agreement template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/agreement-templates",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "agreement-templates"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{projectId}}\",\n  \"name\": \"AFS — Standard 2026\",\n  \"description\": \"Agreement for sale\",\n  \"body_html\": \"<html><body><h1>Agreement for sale</h1><p>Buyer: PLACEHOLDER_BUYER_NAME</p></body></html>\",\n  \"header_html\": \"<div class=\\\"header\\\">ORCHID LIFE</div>\",\n  \"footer_html\": \"<div class=\\\"footer\\\">Confidential</div>\",\n  \"page_size\": \"A4\",\n  \"margin_top\": 20,\n  \"margin_bottom\": 20,\n  \"margin_left\": 18,\n  \"margin_right\": 18,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update agreement template",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/agreement-templates/{{agreementTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "agreement-templates",
+                "{{agreementTemplateId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated footer and margins\",\n  \"margin_bottom\": 24\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete agreement template",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/agreement-templates/{{agreementTemplateId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "agreement-templates",
+                "{{agreementTemplateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Pending review",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/pending-review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "pending-review"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Workspace bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/workspace?page=1&limit=20&status=draft&project_id={{projectId}}&search=kumar",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "workspace"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "draft"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "search",
+                  "value": "kumar"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings?page=1&limit=20&project_id={{projectId}}&status=draft&tower=A&unit_type=3bhk&search=ORC",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "draft"
+                },
+                {
+                  "key": "tower",
+                  "value": "A"
+                },
+                {
+                  "key": "unit_type",
+                  "value": "3bhk"
+                },
+                {
+                  "key": "search",
+                  "value": "ORC"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create draft booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{projectId}}\",\n  \"unit_id\": \"{{unitId}}\",\n  \"form_template_id\": \"{{formTemplateId}}\",\n  \"agreement_template_id\": \"{{agreementTemplateId}}\",\n  \"joint_allottees\": [\n    {\n      \"first_name\": \"Sita\",\n      \"last_name\": \"Rao\",\n      \"phone\": \"+919900112233\",\n      \"email\": \"sita@example.com\"\n    }\n  ],\n  \"allottee_address\": \"221B Baker Streetlayout, Bengaluru\",\n  \"allottee_phone\": \"+919876512340\",\n  \"allottee_email\": \"buyer@example.com\",\n  \"agent_name\": \"RERA Agent Co\",\n  \"agent_rera_no\": \"AG Karnataka 554433\",\n  \"agent_contact_no\": \"+919811100022\",\n  \"fund_source\": \"Savings + HDFC home loan\",\n  \"home_loan_pct\": 75,\n  \"notes\": \"Priority booking — sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get booking form payload",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/form",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "form"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Merged agreement HTML",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/merged-agreement",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "merged-agreement"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/submit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "submit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Start review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/start-review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "start-review"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review field",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/review-field",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "review-field"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field_id\": \"{{fieldId}}\",\n  \"status\": \"ok\",\n  \"note\": \"Verified against PAN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Complete review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/complete-review",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "complete-review"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"notes\": \"All KYC acceptable\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Record agreement generated",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/record-agreement",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "record-agreement"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storage_path\": \"agreements/sample-booking/agreement.pdf\",\n  \"file_name\": \"agreement.pdf\",\n  \"size_bytes\": 524288,\n  \"preview_url\": \"https://example.com/preview\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark agreement printed",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/mark-printed",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "mark-printed"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "cancel"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer withdrew\",\n  \"is_allottee_cancel\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Possession update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/possession",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "possession"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oc_date\": \"2026-06-01\",\n  \"possession_offered_at\": \"2026-06-15T10:00:00.000Z\",\n  \"possession_taken_at\": \"2026-06-20T14:30:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registration complete",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}/registration",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "registration"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_deed_registered_at\": \"2026-07-01\",\n  \"stamp_duty_amount\": 450000,\n  \"registration_charges\": 28000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get booking detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update booking (draft fields)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/bookings/{{bookingId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allottee_phone\": \"+919977665544\",\n  \"notes\": \"Revised contact\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Field values",
+      "item": [
+        {
+          "name": "Get field values for booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/field-values/{{bookingId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "field-values",
+                "{{bookingId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk upsert field values",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/field-values/{{bookingId}}/bulk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "field-values",
+                "{{bookingId}}",
+                "bulk"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"values\": [\n    {\n      \"field_id\": \"{{fieldId}}\",\n      \"value_text\": \"Rahul Verma\"\n    },\n    {\n      \"field_id\": \"{{fieldId2}}\",\n      \"value_number\": 42,\n      \"value_date\": \"1990-05-15\",\n      \"value_boolean\": true,\n      \"value_json\": {\n        \"city\": \"Mumbai\"\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Upsert single field value",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/field-values/{{bookingId}}/{{fieldId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "field-values",
+                "{{bookingId}}",
+                "{{fieldId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value_text\": \"Updated value\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "List documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents?page=1&limit=20&booking_id={{bookingId}}&type=aadhar_card&is_verified=false",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "booking_id",
+                  "value": "{{bookingId}}"
+                },
+                {
+                  "key": "type",
+                  "value": "aadhar_card"
+                },
+                {
+                  "key": "is_verified",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload document (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/upload",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "upload"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "booking_id",
+                  "type": "text",
+                  "value": "{{bookingId}}"
+                },
+                {
+                  "key": "type",
+                  "type": "text",
+                  "value": "aadhar_card"
+                },
+                {
+                  "key": "allottee_index",
+                  "type": "text",
+                  "value": "0"
+                },
+                {
+                  "key": "notes",
+                  "type": "text",
+                  "value": "Sample KYC upload"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "Body → form-data: attach `file`, set text fields `booking_id`, `type` (e.g. aadhar_card, pan_card, payment_receipt). Optional: allottee_index, notes."
+          }
+        },
+        {
+          "name": "Signed URL only",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/{{documentId}}/signed-url",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{documentId}}",
+                "signed-url"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Document metadata + URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/{{documentId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{documentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete document",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/{{documentId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{documentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify document",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/{{documentId}}/verify",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{documentId}}",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_verified\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reject document",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/documents/{{documentId}}/verify",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{documentId}}",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_verified\": false,\n  \"rejection_reason\": \"Photo unclear — reupload\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Collections summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/collections?year=2026&month=3&project_id={{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "collections"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "month",
+                  "value": "3"
+                },
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment summary for booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/booking/{{bookingId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "booking",
+                "{{bookingId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments?page=1&limit=20&booking_id={{bookingId}}&status=pending&milestone=booking_5pct",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "booking_id",
+                  "value": "{{bookingId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "milestone",
+                  "value": "booking_5pct"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record payment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}/record",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "record"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount_paid\": 250000,\n  \"payment_method\": \"neft\",\n  \"bank_name\": \"HDFC Bank\",\n  \"paid_at\": \"2026-03-28T12:00:00.000Z\",\n  \"tds_deducted\": 0,\n  \"notes\": \"Booking milestone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark cleared",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}/clear",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "clear"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark bounced",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}/bounce",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "bounce"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Demand payment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}/demand",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "demand"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"due_date\": \"2026-04-15\",\n  \"notice_number\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Apply interest",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/payments/{{paymentId}}/interest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "interest"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interest_rate\": 12,\n  \"interest_amount\": 1500.5,\n  \"interest_from_date\": \"2026-02-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List my notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/notifications?page=1&limit=20&is_read=false",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "is_read",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark all read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/notifications/mark-all-read",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "mark-all-read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark one read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/notifications/{{notificationId}}/read",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/notifications",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"booking_id\": \"{{bookingId}}\",\n  \"type\": \"payment_demand\",\n  \"title\": \"Payment due\",\n  \"body\": \"Milestone booking_5pct is overdue.\",\n  \"action_url\": \"/bookings/{{bookingId}}\",\n  \"metadata\": {\n    \"milestone\": \"booking_5pct\",\n    \"amount\": 250000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "KPIs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/dashboard/kpis",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "kpis"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking funnel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/dashboard/booking-funnel?project_id={{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "booking-funnel"
+              ],
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inventory summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/dashboard/inventory-summary?project_id={{projectId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "inventory-summary"
+              ],
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recent activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/dashboard/recent-activity?project_id={{projectId}}&limit=15",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "dashboard",
+                "recent-activity"
+              ],
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [
+        {
+          "name": "Audit log",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/audit?page=1&limit=20&booking_id={{bookingId}}&user_id={{userId}}&action=update&entity=booking",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "booking_id",
+                  "value": "{{bookingId}}"
+                },
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "action",
+                  "value": "update"
+                },
+                {
+                  "key": "entity",
+                  "value": "booking"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Audit for booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/audit/booking/{{bookingId}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "booking",
+                "{{bookingId}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2597 @@
+﻿
+> orchid-life-crm-api@1.0.0 test:e2e
+> jest --config ./test/jest-e2e.json --runInBand --forceExit
+
+npm : [jest-e2e-sequencer] [
+At C:\Users\chait\AppData\Local\Temp\ps-script-2499a156-8c06-477b-a947-74bbd848d388.ps1:88 char:31
++ Set-Location "f:\CRM\PB-CRM"; npm run test:e2e 2>&1 | Out-File -FileP ...
++                               ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([jest-e2e-sequencer] [:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  '01-auth.e2e-spec.ts',
+  '02-projects.e2e-spec.ts',
+  '03-profiles.e2e-spec.ts',
+  '04-manager-projects.e2e-spec.ts',
+  '05-units.e2e-spec.ts',
+  '06-form-templates.e2e-spec.ts',
+  '07-agreement-templates.e2e-spec.ts',
+  '08-bookings-create.e2e-spec.ts',
+  '09-field-values.e2e-spec.ts',
+  '10-booking-submit.e2e-spec.ts',
+  '11-booking-review.e2e-spec.ts',
+  '12-agreement.e2e-spec.ts',
+  '13-documents.e2e-spec.ts',
+  '14-payments.e2e-spec.ts',
+  '15-notifications.e2e-spec.ts',
+  '16-dashboard.e2e-spec.ts',
+  '17-audit.e2e-spec.ts',
+  '18-role-access-matrix.e2e-spec.ts',
+  '19-business-rules.e2e-spec.ts',
+  '20-cleanup.e2e-spec.ts'
+]
+PASS test/01-auth.e2e-spec.ts (11.853 s)
+  01 Auth boundary (e2e)
+    ΓêÜ rejects GET /profiles/me without Authorization with 401 UNAUTHORIZED (5 ms)
+    ΓêÜ rejects GET /profiles/me with malformed Bearer token (401) (60 ms)
+    ΓêÜ rejects GET /profiles/me with expired JWT (401) (65 ms)
+    ΓêÜ logs in super_admin and GET /profiles/me returns role super_admin (380 ms)
+    ΓêÜ logs in manager and GET /profiles/me returns role manager (388 ms)
+    ΓêÜ logs in user and GET /profiles/me returns role user (375 ms)
+
+PASS test/02-projects.e2e-spec.ts (8.027 s)
+  02 Projects (e2e)
+    GET /projects ΓÇö list
+      ΓêÜ returns paginated list as super_admin (238 ms)
+      ΓêÜ returns paginated list as manager (202 ms)
+      ΓêÜ returns paginated list as user (180 ms)
+      ΓêÜ returns 401 without token (3 ms)
+    POST /projects ΓÇö create
+      ΓêÜ creates project as super_admin (201) and stores id (218 ms)
+      ΓêÜ returns 409 DUPLICATE when posting the same payload twice (614 ms)
+      ΓêÜ returns 403 for manager (117 ms)
+      ΓêÜ returns 403 for user (176 ms)
+      ΓêÜ returns 400 when rera_number is missing (141 ms)
+      ΓêÜ returns 400 for invalid possession_date (134 ms)
+    GET /projects/:id
+      ΓêÜ returns project for any authenticated role (210 ms)
+      ΓêÜ returns 404 for non-existent id (176 ms)
+    PATCH /projects/:id
+      ΓêÜ updates as super_admin (208 ms)
+      ΓêÜ returns 403 for manager (124 ms)
+      ΓêÜ returns 403 for user (127 ms)
+    GET /projects/:id/stats
+      ΓêÜ returns stats as super_admin (771 ms)
+      ΓêÜ returns 403 for manager not assigned to project (685 ms)
+      ΓêÜ returns 403 for user (122 ms)
+    DELETE /projects/:id
+      ΓêÜ returns 403 for manager (518 ms)
+      ΓêÜ soft-deletes disposable project as super_admin (463 ms)
+
+PASS test/03-profiles.e2e-spec.ts (8.735 s)
+  03 Profiles (e2e)
+    GET /profiles/me
+      ΓêÜ returns super_admin profile (268 ms)
+      ΓêÜ returns manager profile (244 ms)
+      ΓêÜ returns user profile (256 ms)
+    PATCH /profiles/me
+      ΓêÜ updates allowed fields as user (251 ms)
+      ΓêÜ ignores role self-promotion in payload (393 ms)
+      ΓêÜ validates or persists phone field (253 ms)
+    GET /profiles ΓÇö list
+      ΓêÜ returns paginated list as super_admin (194 ms)
+      ΓêÜ filters by role=manager (192 ms)
+      ΓêÜ supports search query (203 ms)
+      ΓêÜ returns 403 for manager (128 ms)
+      ΓêÜ returns 403 for user (116 ms)
+    GET /profiles/:id
+      ΓêÜ allows super_admin to load any profile (184 ms)
+      ΓêÜ allows manager to load self (233 ms)
+      ΓêÜ allows user to load self only (216 ms)
+      ΓêÜ returns 403 when user loads another profile (119 ms)
+    PATCH /profiles/:id/role
+      ΓêÜ changes manager to user then restores manager (427 ms)
+      ΓêÜ returns 403 for manager (135 ms)
+      ΓêÜ returns 403 for user (137 ms)
+      ΓêÜ returns 400 for invalid role value (127 ms)
+    PATCH /profiles/:id/assign-manager
+      ΓêÜ assigns manager to user as super_admin (273 ms)
+      ΓêÜ allows manager to view assigned user profile (262 ms)
+      ΓêÜ returns 403 for manager (130 ms)
+    GET /profiles/managers
+      ΓêÜ returns only managers for super_admin (256 ms)
+      ΓêÜ returns 403 for manager (122 ms)
+      ΓêÜ returns 403 for user (195 ms)
+    PATCH /profiles/:id/deactivate
+      ΓêÜ deactivates a throwaway user as super_admin (714 ms)
+      ΓêÜ returns 403 for manager (127 ms)
+
+FAIL test/04-manager-projects.e2e-spec.ts
+  04 Manager projects (e2e)
+    POST /manager-projects
+      ├ù creates assignment as super_admin (201) (126 ms)
+      ├ù returns 409 DUPLICATE for duplicate assignment (144 ms)
+      ├ù returns 403 INVALID_MANAGER when manager_id is not a manager (127 ms)
+      ΓêÜ returns 403 for manager (132 ms)
+      ΓêÜ returns 403 for user (123 ms)
+    GET /manager-projects
+      ΓêÜ returns list as super_admin (186 ms)
+      ΓêÜ filters by manager_id as super_admin (194 ms)
+      ΓêÜ returns own assignments as manager (229 ms)
+      ΓêÜ returns 403 for user (128 ms)
+    DELETE /manager-projects/:id
+      ├ù deletes as super_admin then recreates for later tests (195 ms)
+      ΓêÜ returns 403 for manager (132 ms)
+      ΓêÜ returns 404 for non-existent id (189 ms)
+
+  ΓùÅ 04 Manager projects (e2e) ΓÇ║ POST /manager-projects ΓÇ║ creates assignment as super_admin (201)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      11 |         project_id: state.projectId,
+      12 |       });
+    > 13 |       expect(res.status).toBe(201);
+         |                          ^
+      14 |       assertSuccess(res, 201);
+      15 |       state.managerProjectId = (res.body.data as { id: string }).id;
+      16 |     });
+
+      at Object.<anonymous> (04-manager-projects.e2e-spec.ts:13:26)
+
+  ΓùÅ 04 Manager projects (e2e) ΓÇ║ POST /manager-projects ΓÇ║ returns 409 DUPLICATE for duplicate assignment
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 400
+
+      21 |         project_id: state.projectId,
+      22 |       });
+    > 23 |       expect(res.status).toBe(409);
+         |                          ^
+      24 |       expect(res.body.error.code).toBe('DUPLICATE');
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (04-manager-projects.e2e-spec.ts:23:26)
+
+  ΓùÅ 04 Manager projects (e2e) ΓÇ║ POST /manager-projects ΓÇ║ returns 403 INVALID_MANAGER when manager_id is not a 
+manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (04-manager-projects.e2e-spec.ts:32:18)
+
+  ΓùÅ 04 Manager projects (e2e) ΓÇ║ DELETE /manager-projects/:id ΓÇ║ deletes as super_admin then recreates for later 
+tests
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (04-manager-projects.e2e-spec.ts:82:20)
+
+FAIL test/05-units.e2e-spec.ts (9.335 s)
+  05 Units (e2e)
+    POST /units
+      ├ù creates unit as super_admin (201) (306 ms)
+      ├ù returns 409 DUPLICATE for duplicate tower/floor/unit_no (309 ms)
+      ΓêÜ returns 400 for invalid tower (317 ms)
+      ΓêÜ returns 400 for invalid unit_type (295 ms)
+      ΓêÜ returns 403 for manager (299 ms)
+      ΓêÜ returns 403 for user (321 ms)
+    GET /units
+      ΓêÜ lists as super_admin (465 ms)
+      ├ù filters tower=A (306 ms)
+      ├ù filters by project_id (333 ms)
+      ΓêÜ lists as manager (462 ms)
+      ├ù lists only available units for user role (302 ms)
+    GET /units/matrix
+      ├ù returns matrix for super_admin with project_id (212 ms)
+      ├ù returns matrix for assigned manager (132 ms)
+      ΓêÜ returns 403 for user (131 ms)
+      ΓêÜ returns 400 without project_id (133 ms)
+    GET /units/:id
+      ├ù returns unit as super_admin (207 ms)
+      ├ù returns available unit for user (133 ms)
+    GET /units/:id ΓÇö non-existent
+      ΓêÜ returns 404 (202 ms)
+    PATCH /units/:id
+      ├ù updates as super_admin (221 ms)
+      ΓêÜ returns 403 for manager (131 ms)
+      ΓêÜ returns 403 for user (129 ms)
+    POST /units/bulk
+      ├ù inserts 3 units (142 ms)
+      ├ù skips one duplicate in bulk (135 ms)
+      ΓêÜ returns 403 for manager (140 ms)
+      ΓêÜ returns 400 when more than 100 units (142 ms)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ POST /units ΓÇ║ creates unit as super_admin (201)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      26 |     it('creates unit as super_admin (201)', async () => {
+      27 |       const res = await api(state.adminToken).post('/units', unitPayload());
+    > 28 |       expect(res.status).toBe(201);
+         |                          ^
+      29 |       assertSuccess(res, 201);
+      30 |       state.unitId = (res.body.data as { id: string }).id;
+      31 |     });
+
+      at Object.<anonymous> (05-units.e2e-spec.ts:28:26)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ POST /units ΓÇ║ returns 409 DUPLICATE for duplicate tower/floor/unit_no
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 400
+
+      33 |     it('returns 409 DUPLICATE for duplicate tower/floor/unit_no', async () => {
+      34 |       const res = await api(state.adminToken).post('/units', unitPayload());
+    > 35 |       expect(res.status).toBe(409);
+         |                          ^
+      36 |       expect(res.body.error.code).toBe('DUPLICATE');
+      37 |     });
+      38 |
+
+      at Object.<anonymous> (05-units.e2e-spec.ts:35:26)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units ΓÇ║ filters tower=A
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (05-units.e2e-spec.ts:87:22)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units ΓÇ║ filters by project_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (05-units.e2e-spec.ts:97:22)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units ΓÇ║ lists only available units for user role
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (05-units.e2e-spec.ts:109:22)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units/matrix ΓÇ║ returns matrix for super_admin with project_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (05-units.e2e-spec.ts:121:20)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units/matrix ΓÇ║ returns matrix for assigned manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (05-units.e2e-spec.ts:128:20)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units/:id ΓÇ║ returns unit as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (05-units.e2e-spec.ts:147:20)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ GET /units/:id ΓÇ║ returns available unit for user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      157 |         }),
+      158 |       );
+    > 159 |       expect(create.status).toBe(201);
+          |                             ^
+      160 |       const id = (create.body.data as { id: string }).id;
+      161 |       const res = await api(state.userToken).get(`/units/${id}`);
+      162 |       assertSuccess(res);
+
+      at Object.<anonymous> (05-units.e2e-spec.ts:159:29)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ PATCH /units/:id ΓÇ║ updates as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (05-units.e2e-spec.ts:179:20)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ POST /units/bulk ΓÇ║ inserts 3 units
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      211 |       ];
+      212 |       const res = await api(state.adminToken).post('/units/bulk', { units });
+    > 213 |       expect(res.status).toBe(201);
+          |                          ^
+      214 |       expect(res.body.success).toBe(true);
+      215 |       expect((res.body.data as { inserted: number }).inserted).toBe(3);
+      216 |       expect((res.body.data as { skipped: number }).skipped).toBe(0);
+
+      at Object.<anonymous> (05-units.e2e-spec.ts:213:26)
+
+  ΓùÅ 05 Units (e2e) ΓÇ║ POST /units/bulk ΓÇ║ skips one duplicate in bulk
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      232 |       ];
+      233 |       const res = await api(state.adminToken).post('/units/bulk', { units });
+    > 234 |       expect(res.status).toBe(201);
+          |                          ^
+      235 |       expect((res.body.data as { inserted: number }).inserted).toBe(2);
+      236 |       expect((res.body.data as { skipped: number }).skipped).toBe(1);
+      237 |     });
+
+      at Object.<anonymous> (05-units.e2e-spec.ts:234:26)
+
+FAIL test/06-form-templates.e2e-spec.ts (8.486 s)
+  06 Form templates (e2e)
+    POST /form-templates
+      ├ù creates template as super_admin (133 ms)
+      ΓêÜ returns 403 for manager (142 ms)
+      ΓêÜ returns 403 for user (158 ms)
+      ΓêÜ returns 400 without name (132 ms)
+    GET /form-templates
+      ΓêÜ lists as super_admin (201 ms)
+      ΓêÜ lists as manager (194 ms)
+      ΓêÜ lists as user (210 ms)
+      ├ù filters by project_id (140 ms)
+    GET /form-templates/:id
+      ├ù returns nested sections and fields (224 ms)
+    PATCH /form-templates/:id
+      ├ù updates as super_admin (183 ms)
+      ΓêÜ returns 403 for manager (129 ms)
+    POST /form-templates/:id/sections
+      ├ù creates section (188 ms)
+      ├ù returns 409 for duplicate section_key (190 ms)
+      ΓêÜ returns 403 for manager (137 ms)
+    GET /form-templates/:templateId/sections
+      ├ù lists sections ordered (202 ms)
+    PATCH sections
+      ├ù updates section as super_admin (180 ms)
+      ΓêÜ returns 403 for manager (128 ms)
+    POST fields
+      ├ù creates text field (125 ms)
+      ├ù creates select field with options (121 ms)
+      ├ù returns 409 for duplicate field_key (123 ms)
+      ΓêÜ returns 400 for invalid data_type (148 ms)
+      ΓêÜ returns 400 for invalid field_key pattern (126 ms)
+      ΓêÜ returns 403 for manager (129 ms)
+      ΓêÜ returns 403 for user (138 ms)
+    GET fields
+      ├ù lists all fields for super_admin (190 ms)
+      ├ù restricts fields for user visibility (186 ms)
+      ├ù filters by section_id (126 ms)
+    PATCH field
+      ├ù updates field as super_admin (229 ms)
+      ├ù keeps field_key stable after label-only patch (235 ms)
+      ΓêÜ returns 403 for manager (144 ms)
+    PATCH toggle field
+      ├ù toggles visible_to_user off and on (218 ms)
+    PATCH fields/reorder
+      ├ù reorders fields (134 ms)
+      ΓêÜ returns 403 for manager (131 ms)
+    DELETE field
+      ├ù deletes non-system field (138 ms)
+      ΓêÜ returns 403 deleting system field (96 ms)
+      ΓêÜ returns 403 for manager deleting field (146 ms)
+    DELETE section (disposable)
+      ├ù deletes a throwaway section (197 ms)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST /form-templates ΓÇ║ creates template as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      12 |         description: 'Test form',
+      13 |       });
+    > 14 |       expect(res.status).toBe(201);
+         |                          ^
+      15 |       assertSuccess(res, 201);
+      16 |       state.templateId = (res.body.data as { id: string }).id;
+      17 |     });
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:14:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET /form-templates ΓÇ║ filters by project_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:64:22)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET /form-templates/:id ΓÇ║ returns nested sections and fields
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:71:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH /form-templates/:id ΓÇ║ updates as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:82:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST /form-templates/:id/sections ΓÇ║ creates section
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 500
+
+      102 |         },
+      103 |       );
+    > 104 |       expect(res.status).toBe(201);
+          |                          ^
+      105 |       assertSuccess(res, 201);
+      106 |       state.sectionId = (res.body.data as { id: string }).id;
+      107 |     });
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:104:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST /form-templates/:id/sections ΓÇ║ returns 409 for duplicate section_key
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 500
+
+      116 |         },
+      117 |       );
+    > 118 |       expect(res.status).toBe(409);
+          |                          ^
+      119 |       expect(res.body.error.code).toBe('DUPLICATE');
+      120 |     });
+      121 |
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:118:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET /form-templates/:templateId/sections ΓÇ║ lists sections ordered
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:140:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH sections ΓÇ║ updates section as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:151:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST fields ΓÇ║ creates text field
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      177 |         },
+      178 |       );
+    > 179 |       expect(res.status).toBe(201);
+          |                          ^
+      180 |       assertSuccess(res, 201);
+      181 |       state.fieldId = (res.body.data as { id: string }).id;
+      182 |     });
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:179:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST fields ΓÇ║ creates select field with options
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      194 |         },
+      195 |       );
+    > 196 |       expect(res.status).toBe(201);
+          |                          ^
+      197 |       state.selectFieldId = (res.body.data as { id: string }).id;
+      198 |     });
+      199 |
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:196:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ POST fields ΓÇ║ returns 409 for duplicate field_key
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 400
+
+      209 |         },
+      210 |       );
+    > 211 |       expect(res.status).toBe(409);
+          |                          ^
+      212 |       expect(res.body.error.code).toBe('DUPLICATE');
+      213 |     });
+      214 |
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:211:26)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET fields ΓÇ║ lists all fields for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:277:22)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET fields ΓÇ║ restricts fields for user visibility
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:284:22)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ GET fields ΓÇ║ filters by section_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:291:22)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH field ΓÇ║ updates field as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:301:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH field ΓÇ║ keeps field_key stable after label-only patch
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:310:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH toggle field ΓÇ║ toggles visible_to_user off and on
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:329:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ PATCH fields/reorder ΓÇ║ reorders fields
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:347:20)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ DELETE field ΓÇ║ deletes non-system field
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      369 |         },
+      370 |       );
+    > 371 |       expect(create.status).toBe(201);
+          |                             ^
+      372 |       const fid = (create.body.data as { id: string }).id;
+      373 |       const res = await api(state.adminToken).delete(
+      374 |         `/form-templates/${state.templateId}/fields/${fid}`,
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:371:29)
+
+  ΓùÅ 06 Form templates (e2e) ΓÇ║ DELETE section (disposable) ΓÇ║ deletes a throwaway section
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 500
+
+      415 |         },
+      416 |       );
+    > 417 |       expect(s.status).toBe(201);
+          |                        ^
+      418 |       const sid = (s.body.data as { id: string }).id;
+      419 |       const res = await api(state.adminToken).delete(
+      420 |         `/form-templates/${state.templateId}/sections/${sid}`,
+
+      at Object.<anonymous> (06-form-templates.e2e-spec.ts:417:24)
+
+FAIL test/07-agreement-templates.e2e-spec.ts (5.054 s)
+  07 Agreement templates (e2e)
+    POST /agreement-templates
+      ├ù creates template as super_admin (132 ms)
+      ΓêÜ returns 400 without body_html (119 ms)
+      ΓêÜ returns 400 without project_id (133 ms)
+      ΓêÜ returns 403 for manager (122 ms)
+      ΓêÜ returns 403 for user (138 ms)
+    GET /agreement-templates
+      ΓêÜ lists without body_html in rows (202 ms)
+      ΓêÜ lists as manager (219 ms)
+      ΓêÜ returns 403 for user (139 ms)
+      ├ù filters project_id (127 ms)
+    GET /agreement-templates/:id
+      ├ù includes body_html for super_admin (194 ms)
+      ├ù includes body_html for manager (179 ms)
+      ΓêÜ returns 403 for user (121 ms)
+      ΓêÜ returns 404 for bad id (189 ms)
+    PATCH /agreement-templates/:id
+      ├ù bumps version on update (181 ms)
+      ΓêÜ returns 403 for manager (123 ms)
+    DELETE /agreement-templates/:id
+      ├ù deletes unused template (137 ms)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ POST /agreement-templates ΓÇ║ creates template as super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      22 |         ...agreementBody,
+      23 |       });
+    > 24 |       expect(res.status).toBe(201);
+         |                          ^
+      25 |       assertSuccess(res, 201);
+      26 |       state.agreementTemplateId = (res.body.data as { id: string }).id;
+      27 |     });
+
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:24:26)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ GET /agreement-templates ΓÇ║ filters project_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:89:22)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ GET /agreement-templates/:id ΓÇ║ includes body_html for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:98:20)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ GET /agreement-templates/:id ΓÇ║ includes body_html for manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:106:20)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ PATCH /agreement-templates/:id ΓÇ║ bumps version on update
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:133:20)
+
+  ΓùÅ 07 Agreement templates (e2e) ΓÇ║ DELETE /agreement-templates/:id ΓÇ║ deletes unused template
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      152 |         body_html: '<p>x</p>',
+      153 |       });
+    > 154 |       expect(create.status).toBe(201);
+          |                             ^
+      155 |       const id = (create.body.data as { id: string }).id;
+      156 |       const res = await api(state.adminToken).delete(`/agreement-templates/${id}`);
+      157 |       expect(res.status).toBe(200);
+
+      at Object.<anonymous> (07-agreement-templates.e2e-spec.ts:154:29)
+
+FAIL test/08-bookings-create.e2e-spec.ts
+  08 Bookings create & list (e2e)
+    POST /bookings
+      ├ù creates booking as user (201) (1 ms)
+      ├ù returns 409 when booking same unit again
+      ├ù returns 404 for non-existent unit_id
+      ├ù returns 400 when unit project mismatches
+      ├ù allows manager to create booking
+      ├ù returns 400 when unit_id missing
+    GET /bookings
+      ├ù lists as super_admin with pagination
+      ├ù lists for assigned manager
+      ├ù lists only own booking as user
+      ├ù filters status=draft
+      ├ù searches by application_no
+      ├ù searches by allottee phone
+    GET /bookings/pending-review
+      ├ù returns list for super_admin
+      ├ù returns list for manager
+      ├ù returns 403 for user
+    GET /bookings/:id
+      ├ù returns detail for super_admin
+      ├ù returns detail for manager
+      ├ù returns detail for owner user
+      ├ù returns 403 for user viewing another user booking
+      ├ù returns 404 for random id
+    PATCH /bookings/:id (draft)
+      ├ù allows user to update own draft booking
+      ├ù allows manager to update draft booking
+    GET /bookings/:id/form
+      ├ù returns form structure for user
+      ├ù returns form for manager
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ creates booking as user (201)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ returns 409 when booking same unit again
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ returns 404 for non-existent unit_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ returns 400 when unit project mismatches
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ allows manager to create booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ POST /bookings ΓÇ║ returns 400 when unit_id missing
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ lists as super_admin with pagination
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ lists for assigned manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ lists only own booking as user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ filters status=draft
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ searches by application_no
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings ΓÇ║ searches by allottee phone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/pending-review ΓÇ║ returns list for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/pending-review ΓÇ║ returns list for manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/pending-review ΓÇ║ returns 403 for user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id ΓÇ║ returns detail for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id ΓÇ║ returns detail for manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id ΓÇ║ returns detail for owner user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id ΓÇ║ returns 403 for user viewing another user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id ΓÇ║ returns 404 for random id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ PATCH /bookings/:id (draft) ΓÇ║ allows user to update own draft booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ PATCH /bookings/:id (draft) ΓÇ║ allows manager to update draft booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id/form ΓÇ║ returns form structure for user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+  ΓùÅ 08 Bookings create & list (e2e) ΓÇ║ GET /bookings/:id/form ΓÇ║ returns form for manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      36 |       corpus_fund: 75000,
+      37 |     });
+    > 38 |     expect(u.status).toBe(201);
+         |                      ^
+      39 |     state.unit2Id = (u.body.data as { id: string }).id;
+      40 |   });
+      41 |
+
+      at Object.<anonymous> (08-bookings-create.e2e-spec.ts:38:22)
+
+FAIL test/09-field-values.e2e-spec.ts
+  09 Field values (e2e)
+    ├ù upserts single field value as user (194 ms)
+    ├ù upserts same field again (209 ms)
+    ├ù returns 403 for non-editable field when editable_by_user is false (293 ms)
+    ΓêÜ returns 400 when no value provided (130 ms)
+    ΓêÜ returns 403 or 404 for wrong booking id (209 ms)
+    ├ù returns 403 for another user booking (189 ms)
+    PUT bulk
+      ├ù bulk upserts values (138 ms)
+      ΓêÜ returns 400 for more than 50 items (144 ms)
+      ├ù allows manager bulk upsert on draft booking (145 ms)
+    GET /field-values/:bookingId
+      ├ù returns map keyed by field_key for user (218 ms)
+      ├ù returns for manager (195 ms)
+      ├ù returns 403 for other user booking (205 ms)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ upserts single field value as user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      10 |       { value_text: 'Ramesh Kumar' },
+      11 |     );
+    > 12 |     expect(res.status).toBe(200);
+         |                        ^
+      13 |     expect((res.body as { success: boolean }).success).toBe(true);
+      14 |   });
+      15 |
+
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:12:24)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ upserts same field again
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      19 |       { value_text: 'Ramesh Kumar Updated' },
+      20 |     );
+    > 21 |     expect(res.status).toBe(200);
+         |                        ^
+      22 |     expect((res.body as { success: boolean }).success).toBe(true);
+      23 |   });
+      24 |
+
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:21:24)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ returns 403 for non-editable field when editable_by_user is false
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      33 |       { value_text: 'x' },
+      34 |     );
+    > 35 |     expect(res.status).toBe(403);
+         |                        ^
+      36 |     expect(res.body.error.code).toBe('FIELD_NOT_EDITABLE');
+      37 |     await sb
+      38 |       .from('form_fields')
+
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:35:24)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ returns 403 for another user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:65:16)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ PUT bulk ΓÇ║ bulk upserts values
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      77 |         },
+      78 |       );
+    > 79 |       expect(res.status).toBe(200);
+         |                          ^
+      80 |       const b = res.body as { success?: boolean; count?: number; data?: { count?: number } };
+      81 |       const count = b.count ?? b.data?.count;
+      82 |       expect(count).toBe(2);
+
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:79:26)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ PUT bulk ΓÇ║ allows manager bulk upsert on draft booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:104:20)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ GET /field-values/:bookingId ΓÇ║ returns map keyed by field_key for user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:111:20)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ GET /field-values/:bookingId ΓÇ║ returns for manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:118:20)
+
+  ΓùÅ 09 Field values (e2e) ΓÇ║ GET /field-values/:bookingId ΓÇ║ returns 403 for other user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (09-field-values.e2e-spec.ts:125:18)
+
+FAIL test/10-booking-submit.e2e-spec.ts (7.478 s)
+  10 Booking submit (e2e)
+    ├ù submits booking after required fields are satisfied (395 ms)
+    ├ù returns 422 when submitting an already-submitted booking (192 ms)
+    ├ù returns 403 when manager tries to submit user booking (192 ms)
+    ├ù blocks PATCH booking after submit for user (218 ms)
+    ├ù blocks field value upsert for user after submit (196 ms)
+    ├ù shows booking in pending-review for manager after submit (344 ms)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ submits booking after required fields are satisfied
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:40:18)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ returns 422 when submitting an already-submitted booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      44 |   it('returns 422 when submitting an already-submitted booking', async () => {
+      45 |     const res = await api(state.userToken).post(`/bookings/${state.bookingId}/submit`);
+    > 46 |     expect(res.status).toBe(422);
+         |                        ^
+      47 |     expect(res.body.success).toBe(false);
+      48 |   });
+      49 |
+
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:46:24)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ returns 403 when manager tries to submit user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:52:16)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ blocks PATCH booking after submit for user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+      57 |       notes: 'nope',
+      58 |     });
+    > 59 |     expect(res.status).toBe(400);
+         |                        ^
+      60 |     expect(res.body.error.code).toBe('BOOKING_NOT_EDITABLE');
+      61 |   });
+      62 |
+
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:59:24)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ blocks field value upsert for user after submit
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+      66 |       { value_text: 'locked' },
+      67 |     );
+    > 68 |     expect(res.status).toBe(400);
+         |                        ^
+      69 |     expect(res.body.error.code).toBe('FIELD_VALUES_LOCKED');
+      70 |   });
+      71 |
+
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:68:24)
+
+  ΓùÅ 10 Booking submit (e2e) ΓÇ║ shows booking in pending-review for manager after submit
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (10-booking-submit.e2e-spec.ts:74:18)
+
+FAIL test/11-booking-review.e2e-spec.ts (5.115 s)
+  11 Booking review (e2e)
+    ├ù starts review as manager (183 ms)
+    ├ù returns 422 when starting review again (195 ms)
+    ΓêÜ returns 403 when user starts review (128 ms)
+    ├ù manager marks field ok then needs_revision (132 ms)
+    ΓêÜ returns 403 when user reviews field (121 ms)
+    ΓêÜ returns 400 for invalid review status (131 ms)
+    ├ù request_revision moves booking to revision_requested (194 ms)
+    ├ù user fixes field and resubmits after revision (555 ms)
+    ├ù manager starts review again (192 ms)
+    ├ù manager rejects booking (172 ms)
+    ├ù creates fresh booking for approval flow (120 ms)
+    ├ù returns 422 approving when fields need revision (123 ms)
+    ΓêÜ returns 403 when user completes review (126 ms)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ starts review as manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+       8 |       `/bookings/${state.bookingId}/start-review`,
+       9 |     );
+    > 10 |     expect(res.status).toBe(200);
+         |                        ^
+      11 |     expect((res.body as { success?: boolean }).success ?? res.body.data?.success).toBe(
+      12 |       true,
+      13 |     );
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:10:24)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ returns 422 when starting review again
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      22 |       `/bookings/${state.bookingId}/start-review`,
+      23 |     );
+    > 24 |     expect(res.status).toBe(422);
+         |                        ^
+      25 |   });
+      26 |
+      27 |   it('returns 403 when user starts review', async () => {
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:24:24)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ manager marks field ok then needs_revision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      41 |       },
+      42 |     );
+    > 43 |     expect(ok.status).toBe(200);
+         |                       ^
+      44 |
+      45 |     const rev = await api(state.managerToken).patch(
+      46 |       `/bookings/${state.bookingId}/review-field`,
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:43:23)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ request_revision moves booking to revision_requested
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      84 |       },
+      85 |     );
+    > 86 |     expect(res.status).toBe(200);
+         |                        ^
+      87 |
+      88 |     const get = await api(state.userToken).get(`/bookings/${state.bookingId}`);
+      89 |     assertSuccess(get);
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:86:24)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ user fixes field and resubmits after revision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:99:18)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ manager starts review again
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      105 |       `/bookings/${state.bookingId}/start-review`,
+      106 |     );
+    > 107 |     expect(res.status).toBe(200);
+          |                        ^
+      108 |     const get = await api(state.managerToken).get(`/bookings/${state.bookingId}`);
+      109 |     assertSuccess(get);
+      110 |     expect((get.body.data as { status: string }).status).toBe('under_review');
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:107:24)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ manager rejects booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      119 |       },
+      120 |     );
+    > 121 |     expect(res.status).toBe(200);
+          |                        ^
+      122 |     const get = await api(state.managerToken).get(`/bookings/${state.bookingId}`);
+      123 |     assertSuccess(get);
+      124 |     expect((get.body.data as { status: string }).status).toBe('rejected');
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:121:24)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ creates fresh booking for approval flow
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      140 |       corpus_fund: 75000,
+      141 |     });
+    > 142 |     expect(u.status).toBe(201);
+          |                      ^
+      143 |     const unitId = (u.body.data as { id: string }).id;
+      144 |
+      145 |     const b = await api(state.userToken).post('/bookings', {
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:142:22)
+
+  ΓùÅ 11 Booking review (e2e) ΓÇ║ returns 422 approving when fields need revision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      196 |       corpus_fund: 75000,
+      197 |     });
+    > 198 |     expect(u.status).toBe(201);
+          |                      ^
+      199 |     const unitId = (u.body.data as { id: string }).id;
+      200 |     const b = await api(state.userToken).post('/bookings', {
+      201 |       project_id: state.projectId,
+
+      at Object.<anonymous> (11-booking-review.e2e-spec.ts:198:22)
+
+FAIL test/12-agreement.e2e-spec.ts
+  12 Agreement merge & record (e2e)
+    ├ù returns merged agreement for approved booking (178 ms)
+    ├ù returns 422 merged agreement when not approved (173 ms)
+    ΓêÜ returns 403 for user merged agreement (133 ms)
+    ├ù allows super_admin merged agreement (188 ms)
+    ├ù records agreement document as manager (202 ms)
+    ├ù returns 422 record-agreement when booking not approved (191 ms)
+    ΓêÜ returns 403 when user records agreement (124 ms)
+    ΓêÜ returns 400 when record-agreement missing fields (125 ms)
+    ├ù marks agreement printed as manager (181 ms)
+    ΓêÜ returns 403 when user marks printed (125 ms)
+    ├ù returns 422 mark-printed when wrong status (195 ms)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ returns merged agreement for approved booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:10:18)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ returns 422 merged agreement when not approved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      25 |       `/bookings/${state.secondaryBookingId}/merged-agreement`,
+      26 |     );
+    > 27 |     expect(res.status).toBe(422);
+         |                        ^
+      28 |   });
+      29 |
+      30 |   it('returns 403 for user merged agreement', async () => {
+
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:27:24)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ allows super_admin merged agreement
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:41:18)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ records agreement document as manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      52 |       },
+      53 |     );
+    > 54 |     expect(res.status).toBe(200);
+         |                        ^
+      55 |     const docId = (res.body.data as { document_id?: string })?.document_id;
+      56 |     expect(docId).toBeDefined();
+      57 |     state.agreementDocumentId = docId ?? '';
+
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:54:24)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ returns 422 record-agreement when booking not approved
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      71 |       },
+      72 |     );
+    > 73 |     expect(res.status).toBe(422);
+         |                        ^
+      74 |   });
+      75 |
+      76 |   it('returns 403 when user records agreement', async () => {
+
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:73:24)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ marks agreement printed as manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+       98 |       `/bookings/${state.approvedBookingId}/mark-printed`,
+       99 |     );
+    > 100 |     expect(res.status).toBe(200);
+          |                        ^
+      101 |     expect((res.body as { success?: boolean }).success ?? res.body.data?.success).toBe(true);
+      102 |
+      103 |     const get = await api(state.managerToken).get(`/bookings/${state.approvedBookingId}`);
+
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:100:24)
+
+  ΓùÅ 12 Agreement merge & record (e2e) ΓÇ║ returns 422 mark-printed when wrong status
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      117 |       `/bookings/${state.secondaryBookingId}/mark-printed`,
+      118 |     );
+    > 119 |     expect(res.status).toBe(422);
+          |                        ^
+      120 |   });
+      121 | });
+      122 |
+
+      at Object.<anonymous> (12-agreement.e2e-spec.ts:119:24)
+
+FAIL test/13-documents.e2e-spec.ts
+  13 Documents (e2e)
+    GET /documents
+      ΓêÜ lists as super_admin (197 ms)
+      ├ù lists as manager with booking_id (117 ms)
+      ΓêÜ lists as user (own bookings) (193 ms)
+      ├ù filters by booking_id (119 ms)
+    GET /documents/:id
+      ΓêÜ returns document with url fields when authorized
+      ΓêÜ returns 404 for missing id (197 ms)
+    POST /documents/upload
+      ├ù uploads KYC pdf as user (125 ms)
+      ├ù returns 403 uploading to another user booking (122 ms)
+      ├ù returns 403 when user uploads agreement_for_sale (135 ms)
+      ├ù returns 413 when file exceeds bucket limit (148 ms)
+      ├ù returns 415 for wrong mime type (126 ms)
+      ├ù allows manager upload (142 ms)
+    PATCH /documents/:id/verify
+      ΓêÜ verifies KYC as manager
+      ΓêÜ rejects with reason
+      ΓêÜ returns 403 for user
+    GET /documents/:id/signed-url
+      ΓêÜ returns url payload
+    DELETE /documents/:id
+      ├ù manager deletes non-agreement doc (129 ms)
+      ΓêÜ returns 403 deleting agreement_for_sale
+      ΓêÜ returns 403 for user delete
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ GET /documents ΓÇ║ lists as manager with booking_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (13-documents.e2e-spec.ts:23:22)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ GET /documents ΓÇ║ filters by booking_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (13-documents.e2e-spec.ts:35:22)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ uploads KYC pdf as user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      65 |         .field('allottee_index', '0')
+      66 |         .attach('file', pdfBuffer, { filename: 'aadhar.pdf', contentType: 'application/pdf' });
+    > 67 |       expect(res.status).toBe(201);
+         |                          ^
+      68 |       expect(res.body.success).toBe(true);
+      69 |       state.kycDocumentId = (res.body.data as { id: string }).id;
+      70 |     });
+
+      at Object.<anonymous> (13-documents.e2e-spec.ts:67:26)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ returns 403 uploading to another user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (13-documents.e2e-spec.ts:80:18)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ returns 403 when user uploads agreement_for_sale
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (13-documents.e2e-spec.ts:91:18)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ returns 413 when file exceeds bucket limit
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 413
+    Received: 400
+
+      101 |         .field('allottee_index', '0')
+      102 |         .attach('file', big, { filename: 'big.pdf', contentType: 'application/pdf' });
+    > 103 |       expect(res.status).toBe(413);
+          |                          ^
+      104 |     });
+      105 |
+      106 |     it('returns 415 for wrong mime type', async () => {
+
+      at Object.<anonymous> (13-documents.e2e-spec.ts:103:26)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ returns 415 for wrong mime type
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 415
+    Received: 400
+
+      115 |           contentType: 'text/plain',
+      116 |         });
+    > 117 |       expect(res.status).toBe(415);
+          |                          ^
+      118 |     });
+      119 |
+      120 |     it('allows manager upload', async () => {
+
+      at Object.<anonymous> (13-documents.e2e-spec.ts:117:26)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ POST /documents/upload ΓÇ║ allows manager upload
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      126 |         .field('allottee_index', '0')
+      127 |         .attach('file', pdfBuffer, { filename: 'pan.pdf', contentType: 'application/pdf' });
+    > 128 |       expect(res.status).toBe(201);
+          |                          ^
+      129 |     });
+      130 |   });
+      131 |
+
+      at Object.<anonymous> (13-documents.e2e-spec.ts:128:26)
+
+  ΓùÅ 13 Documents (e2e) ΓÇ║ DELETE /documents/:id ΓÇ║ manager deletes non-agreement doc
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      195 |         .field('allottee_index', '0')
+      196 |         .attach('file', pdfBuffer, { filename: 'del.pdf', contentType: 'application/pdf' });
+    > 197 |       expect(up.status).toBe(201);
+          |                         ^
+      198 |       const id = (up.body.data as { id: string }).id;
+      199 |       const res = await api(state.managerToken).delete(`/documents/${id}`);
+      200 |       expect(res.status).toBe(200);
+
+      at Object.<anonymous> (13-documents.e2e-spec.ts:197:25)
+
+FAIL test/14-payments.e2e-spec.ts (7.137 s)
+  14 Payments (e2e)
+    GET /payments/booking/:bookingId
+      ├ù returns summary for super_admin (193 ms)
+      ├ù returns for owning user (191 ms)
+      ├ù returns 403 for other user booking (202 ms)
+    GET /payments
+      ΓêÜ lists as super_admin (250 ms)
+      ├ù filters booking_id (139 ms)
+      ΓêÜ filters status=pending (249 ms)
+      ΓêÜ lists for user own payments (228 ms)
+    GET /payments/:id
+      ΓêÜ returns detail (1 ms)
+      ΓêÜ returns 404 for bad id (233 ms)
+    PATCH demand / record / clear / bounce / interest
+      ΓêÜ sets demand notice 1 (1 ms)
+      ΓêÜ sets demand notice 2 (2 ms)
+      ΓêÜ returns 403 demand as user (1 ms)
+      ΓêÜ returns 400 for invalid notice_number
+      ΓêÜ records payment
+      ΓêÜ returns 403 record as user
+      ΓêÜ returns 400 record without amount
+      ΓêÜ clears payment (1 ms)
+      ΓêÜ applies bounce fee on new received payment (200 ms)
+      ΓêÜ sets interest
+    GET /payments/collections
+      ΓêÜ returns monthly collections for super_admin (200 ms)
+      ΓêÜ filters by year (229 ms)
+      ΓêÜ returns 403 for user (168 ms)
+
+  ΓùÅ 14 Payments (e2e) ΓÇ║ GET /payments/booking/:bookingId ΓÇ║ returns summary for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (14-payments.e2e-spec.ts:15:20)
+
+  ΓùÅ 14 Payments (e2e) ΓÇ║ GET /payments/booking/:bookingId ΓÇ║ returns for owning user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (14-payments.e2e-spec.ts:30:20)
+
+  ΓùÅ 14 Payments (e2e) ΓÇ║ GET /payments/booking/:bookingId ΓÇ║ returns 403 for other user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (14-payments.e2e-spec.ts:37:18)
+
+  ΓùÅ 14 Payments (e2e) ΓÇ║ GET /payments ΓÇ║ filters booking_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (14-payments.e2e-spec.ts:51:22)
+
+FAIL test/15-notifications.e2e-spec.ts (6.639 s)
+  15 Notifications (e2e)
+    GET /notifications
+      ΓêÜ returns paginated notifications for user with unread_count (384 ms)
+      ΓêÜ filters is_read=false (370 ms)
+      ΓêÜ returns manager notifications (325 ms)
+      ΓêÜ returns super_admin notifications (378 ms)
+    PATCH /notifications/:id/read
+      ΓêÜ marks own notification read (308 ms)
+      ΓêÜ returns 404 for another user notification id (1 ms)
+    PATCH /notifications/mark-all-read
+      ΓêÜ marks all read for user (521 ms)
+    POST /notifications
+      ├ù creates notification as manager (143 ms)
+      ΓêÜ returns 403 for user (144 ms)
+
+  ΓùÅ 15 Notifications (e2e) ΓÇ║ POST /notifications ΓÇ║ creates notification as manager
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      81 |         booking_id: state.bookingId,
+      82 |       });
+    > 83 |       expect(res.status).toBe(201);
+         |                          ^
+      84 |       assertSuccess(res, 201);
+      85 |     });
+      86 |
+
+      at Object.<anonymous> (15-notifications.e2e-spec.ts:83:26)
+
+FAIL test/16-dashboard.e2e-spec.ts (5.534 s)
+  16 Dashboard (e2e)
+    GET /dashboard/kpis
+      ├ù returns KPI object for super_admin (204 ms)
+      ΓêÜ returns KPI for manager (186 ms)
+      ΓêÜ returns 403 for user (165 ms)
+    GET /dashboard/booking-funnel
+      ΓêÜ returns status counts (202 ms)
+      ΓêÜ filters by project_id (272 ms)
+      ΓêÜ returns 403 for user (133 ms)
+    GET /dashboard/inventory-summary
+      ΓêÜ returns grouped inventory summary (207 ms)
+      ΓêÜ returns for manager (192 ms)
+      ΓêÜ returns 403 for user (114 ms)
+    GET /dashboard/recent-activity
+      ΓêÜ returns recent activity for super_admin (297 ms)
+      ΓêÜ respects limit (245 ms)
+      ΓêÜ returns 403 for user (119 ms)
+
+  ΓùÅ 16 Dashboard (e2e) ΓÇ║ GET /dashboard/kpis ΓÇ║ returns KPI object for super_admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      13 |         const section = d[k];
+      14 |         for (const v of Object.values(section)) {
+    > 15 |           expect(typeof v === 'number' || v === null).toBe(true);
+         |                                                       ^
+      16 |         }
+      17 |       }
+      18 |     });
+
+      at Object.<anonymous> (16-dashboard.e2e-spec.ts:15:55)
+
+FAIL test/17-audit.e2e-spec.ts
+  17 Audit (e2e)
+    GET /audit
+      ΓêÜ lists audit entries for super_admin (184 ms)
+      ├ù filters by booking_id (120 ms)
+      ΓêÜ filters by action (187 ms)
+      ΓêÜ lists for manager (scoped) (240 ms)
+      ΓêÜ lists for user (own bookings only) (198 ms)
+    GET /audit/booking/:bookingId
+      ├ù returns chronological audit for booking (184 ms)
+      ├ù returns for booking owner user (184 ms)
+      ├ù returns 403 for other user booking (181 ms)
+      ΓêÜ returns 404 or empty for non-existent booking (182 ms)
+
+  ΓùÅ 17 Audit (e2e) ΓÇ║ GET /audit ΓÇ║ filters by booking_id
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at assertPaginated (helpers/assertions.helper.ts:24:3)
+      at Object.<anonymous> (17-audit.e2e-spec.ts:16:22)
+
+  ΓùÅ 17 Audit (e2e) ΓÇ║ GET /audit/booking/:bookingId ΓÇ║ returns chronological audit for booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (17-audit.e2e-spec.ts:40:20)
+
+  ΓùÅ 17 Audit (e2e) ΓÇ║ GET /audit/booking/:bookingId ΓÇ║ returns for booking owner user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (17-audit.e2e-spec.ts:52:20)
+
+  ΓùÅ 17 Audit (e2e) ΓÇ║ GET /audit/booking/:bookingId ΓÇ║ returns 403 for other user booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      12 |   errorCode?: string,
+      13 | ): void {
+    > 14 |   expect(res.status).toBe(statusCode);
+         |                      ^
+      15 |   expect(res.body.success).toBe(false);
+      16 |   expect(res.body).toHaveProperty('error');
+      17 |   expect(res.body.error).toHaveProperty('message');
+
+      at assertError (helpers/assertions.helper.ts:14:22)
+      at Object.<anonymous> (17-audit.e2e-spec.ts:59:18)
+
+FAIL test/18-role-access-matrix.e2e-spec.ts
+  18 Role access matrix (e2e)
+    ├ù enforces matrix across endpoints (1997 ms)
+
+  ΓùÅ 18 Role access matrix (e2e) ΓÇ║ enforces matrix across endpoints
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      88 |         res = await client.post(c.path, c.body ?? {});
+      89 |       }
+    > 90 |       expect(res.status).toBe(c.expected);
+         |                          ^
+      91 |       if (
+      92 |         c.method === 'POST' &&
+      93 |         c.path === '/projects' &&
+
+      at Object.<anonymous> (18-role-access-matrix.e2e-spec.ts:90:26)
+
+FAIL test/19-business-rules.e2e-spec.ts
+  19 Business rules (e2e)
+    ├ù prevents duplicate unit booking (409 UNIT_NOT_AVAILABLE) (129 ms)
+    ├ù validates application_no format on new booking (130 ms)
+    ├ù auto-creates payment schedule rows for booking (183 ms)
+    ├ù rejects deleting form template that is in use (194 ms)
+    ├ù rejects deleting agreement template referenced by booking (220 ms)
+    ΓêÜ returns 404 for DELETE /audit/:id (no route) (4 ms)
+    ΓêÜ returns 404 for PUT /audit/:id (no route) (4 ms)
+
+  ΓùÅ 19 Business rules (e2e) ΓÇ║ prevents duplicate unit booking (409 UNIT_NOT_AVAILABLE)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      20 |       corpus_fund: 75000,
+      21 |     });
+    > 22 |     expect(u.status).toBe(201);
+         |                      ^
+      23 |     const unitId = (u.body.data as { id: string }).id;
+      24 |     const b1 = await api(state.userToken).post('/bookings', {
+      25 |       project_id: state.projectId,
+
+      at Object.<anonymous> (19-business-rules.e2e-spec.ts:22:22)
+
+  ΓùÅ 19 Business rules (e2e) ΓÇ║ validates application_no format on new booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      54 |       corpus_fund: 75000,
+      55 |     });
+    > 56 |     expect(u.status).toBe(201);
+         |                      ^
+      57 |     const unitId = (u.body.data as { id: string }).id;
+      58 |     const b = await api(state.userToken).post('/bookings', {
+      59 |       project_id: state.projectId,
+
+      at Object.<anonymous> (19-business-rules.e2e-spec.ts:56:22)
+
+  ΓùÅ 19 Business rules (e2e) ΓÇ║ auto-creates payment schedule rows for booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      2 |
+      3 | export function assertSuccess(res: Response, statusCode = 200): void {
+    > 4 |   expect(res.status).toBe(statusCode);
+        |                      ^
+      5 |   expect(res.body.success).toBe(true);
+      6 |   expect(res.body).toHaveProperty('data');
+      7 | }
+
+      at assertSuccess (helpers/assertions.helper.ts:4:22)
+      at Object.<anonymous> (19-business-rules.e2e-spec.ts:73:18)
+
+  ΓùÅ 19 Business rules (e2e) ΓÇ║ rejects deleting form template that is in use
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+      83 |   it('rejects deleting form template that is in use', async () => {
+      84 |     const res = await api(state.adminToken).delete(`/form-templates/${state.templateId}`);
+    > 85 |     expect(res.status).toBe(400);
+         |                        ^
+      86 |     expect(res.body.error.code).toBe('TEMPLATE_IN_USE');
+      87 |   });
+      88 |
+
+      at Object.<anonymous> (19-business-rules.e2e-spec.ts:85:24)
+
+  ΓùÅ 19 Business rules (e2e) ΓÇ║ rejects deleting agreement template referenced by booking
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+      91 |       `/agreement-templates/${state.agreementTemplateId}`,
+      92 |     );
+    > 93 |     expect(res.status).toBe(400);
+         |                        ^
+      94 |     expect(res.body.error.code).toBe('TEMPLATE_IN_USE');
+      95 |   });
+      96 |
+
+      at Object.<anonymous> (19-business-rules.e2e-spec.ts:93:24)
+
+PASS test/20-cleanup.e2e-spec.ts
+  20 Cleanup test data (e2e)
+    ΓêÜ removes seeded project graph when possible (2 ms)
+
+Test Suites: 16 failed, 4 passed, 20 total
+Tests:       122 failed, 167 passed, 289 total
+Snapshots:   0 total
+Time:        119.924 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after 
+all tests finished?
