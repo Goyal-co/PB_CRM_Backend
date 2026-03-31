@@ -16,7 +16,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '@common/decorators/roles.decorator';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
+import { CurrentUser as CurrentUserType } from '@common/types/user.types';
 import { AgreementTemplatesService } from './agreement-templates.service';
 import { CreateAgreementTemplateDto } from './dto/create-agreement-template.dto';
 import { UpdateAgreementTemplateDto } from './dto/update-agreement-template.dto';
@@ -29,21 +31,23 @@ export class AgreementTemplatesController {
   constructor(private readonly service: AgreementTemplatesService) {}
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles('super_admin', 'manager')
   @ApiOperation({ summary: 'List agreement templates (no body_html)' })
   @ApiResponse({ status: 200 })
-  async list(@Query() q: QueryAgreementTemplatesDto): Promise<unknown> {
-    return this.service.list(q);
+  async list(
+    @CurrentUser() user: CurrentUserType,
+    @Query() q: QueryAgreementTemplatesDto,
+  ): Promise<unknown> {
+    return this.service.listForUser(user, q);
   }
 
   @Get(':id')
-  @UseGuards(RolesGuard)
-  @Roles('super_admin', 'manager')
   @ApiOperation({ summary: 'Get full agreement template' })
   @ApiResponse({ status: 200 })
-  async one(@Param('id') id: string): Promise<unknown> {
-    return this.service.findOne(id);
+  async one(
+    @CurrentUser() user: CurrentUserType,
+    @Param('id') id: string,
+  ): Promise<unknown> {
+    return this.service.findOneForUser(user, id);
   }
 
   @Post()
