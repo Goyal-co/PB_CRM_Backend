@@ -30,13 +30,15 @@ export class SupabaseService {
 
   /**
    * Returns a Supabase client scoped to the caller's JWT so Postgres RLS policies apply.
-   * Uses the `accessToken` option so REST/RPC requests send `Authorization: Bearer <jwt>`;
-   * `setSession` without a refresh token often leaves `auth.uid()` unset in RPCs.
+   * We explicitly attach `Authorization: Bearer <jwt>` so PostgREST/RPC calls
+   * see the authenticated user and `auth.uid()` resolves correctly.
    */
   async getUserClient(accessToken: string): Promise<SupabaseClient> {
     return createClient(this.url, this.anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
-      accessToken: async () => accessToken,
+      global: {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
     });
   }
 }

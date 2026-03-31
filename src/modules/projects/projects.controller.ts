@@ -45,8 +45,11 @@ export class ProjectsController {
   @Get('my')
   @ApiOperation({ summary: 'Projects assigned to current user (get_my_projects RPC)' })
   @ApiResponse({ status: 200 })
-  async myProjects(@Req() req: FastifyRequest): Promise<unknown> {
-    return { data: await this.projectsService.getMyProjects(req.accessToken!) };
+  async myProjects(
+    @CurrentUser() user: CurrentUserType,
+    @Req() req: FastifyRequest,
+  ): Promise<unknown> {
+    return { data: await this.projectsService.getMyProjects(user, req.accessToken!) };
   }
 
   @Get(':id/stats')

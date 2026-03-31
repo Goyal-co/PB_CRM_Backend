@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { CurrentUser } from '@common/types/user.types';
-import { mapRpcError, throwFromPostgrest } from '@common/utils/supabase-errors';
+import { throwFromPostgrest } from '@common/utils/supabase-errors';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { assertManagerCanAccessProject } from '@common/utils/access.util';
@@ -290,12 +290,82 @@ export class ProjectsService {
   /**
    * Assigned projects for the caller (manager / user / super_admin) via DB RPC.
    */
-  async getMyProjects(accessToken: string): Promise<unknown> {
-    const client = await this.supabase.getUserClient(accessToken);
-    const { data, error } = await client.rpc('get_my_projects');
-    if (error) {
-      mapRpcError(error, 'get_my_projects failed');
+  async getMyProjects(user: CurrentUser, accessToken: string): Promise<unknown> {
+    // Prefer the DB RPC when available, but fall back to table reads if the RPC is missing/broken.
+    try {
+      const client = await this.supabase.getUserClient(accessToken);
+      const { data, error } = await client.rpc('get_my_projects');
+      if (error) {
+        throw error;
+      }
+      return data;
+    } catch (err) {
+      // Fallback: derive projects from manager assignments.
+      // - managers: projects via manager_projects(manager_id = self)
+      // - users: projects via assigned_manager_id → that manager's manager_projects
+      // - super_admin: all active projects
+      const admin = this.supabase.supabaseAdmin;
+
+      if (user.role === 'super_admin') {
+        const { data, error } = await admin
+          .from('projects')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+        if (error) {
+          throwFromPostgrest(error, 'PROJECTS_LIST_FAILED');
+        }
+        return data ?? [];
+      }
+
+      let managerId: string | null = null;
+      if (user.role === 'manager') {
+        managerId = user.id;
+      } else {
+        const { data: prof, error: pErr } = await admin
+          .from('profiles')
+          .select('assigned_manager_id')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (pErr) {
+          throwFromPostgrest(pErr, 'PROFILE_LOAD_FAILED');
+        }
+        managerId = (prof as { assigned_manager_id: string | null } | null)
+          ?.assigned_manager_id ?? null;
+      }
+
+      if (!managerId) {
+        // No manager linkage → no assigned projects.
+        return [];
+      }
+
+      const { data: mp, error: mpErr } = await admin
+        .from('manager_projects')
+        .select('project_id')
+        .eq('manager_id', managerId);
+      if (mpErr) {
+        throwFromPostgrest(mpErr, 'MANAGER_PROJECTS_FAILED');
+      }
+      const ids = [
+        ...new Set(
+          (mp as { project_id: string }[] | null)?.map((r) => r.project_id) ??
+            [],
+        ),
+      ];
+      if (!ids.length) {
+        return [];
+      }
+
+      const { data, error } = await admin
+        .from('projects')
+        .select('*')
+        .eq('is_active', true)
+        .in('id', ids)
+        .order('created_at', { ascending: false });
+      if (error) {
+        throwFromPostgrest(error, 'PROJECTS_LIST_FAILED');
+      }
+      return data ?? [];
     }
-    return data;
   }
 }
