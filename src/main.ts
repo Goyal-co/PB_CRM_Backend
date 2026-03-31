@@ -14,9 +14,10 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { createAppValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap(): Promise<void> {
+  const adapter = new FastifyAdapter({ logger: true });
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true }),
+    adapter,
   );
 
   await app.register(helmet as never);
@@ -47,6 +48,33 @@ async function bootstrap(): Promise<void> {
     .build();
   const document = SwaggerModule.createDocument(app, swagger);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Initialize Nest (and its default parsers) first, then patch Fastify's JSON parser.
+  // This avoids "Content type parser already present" during Nest init.
+  await app.init();
+
+  // Some clients send `Content-Type: application/json` with an empty body.
+  // Fastify throws before Nest validation can respond nicely. Treat empty JSON as `{}`.
+  const fastify = adapter.getInstance();
+  if (typeof (fastify as any).removeContentTypeParser === 'function') {
+    (fastify as any).removeContentTypeParser('application/json');
+  }
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    (_req, body, done) => {
+      const raw = typeof body === 'string' ? body.trim() : '';
+      if (!raw) {
+        done(null, {});
+        return;
+      }
+      try {
+        done(null, JSON.parse(raw));
+      } catch (e) {
+        done(e as Error, undefined);
+      }
+    },
+  );
 
   const port = configService.get<number>('app.port', { infer: true }) ?? 3000;
   await app.listen(port, '0.0.0.0');
