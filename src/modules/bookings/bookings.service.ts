@@ -239,6 +239,24 @@ export class BookingsService {
     user: CurrentUser,
     dto: CreateBookingDto,
   ): Promise<Record<string, unknown>> {
+    // Idempotency guard: UI double-submits can race and trigger 409 after the first insert
+    // (e.g., DB triggers may mark the unit unavailable immediately).
+    const { data: existing, error: exErr } = await this.admin()
+      .from('bookings')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('unit_id', dto.unit_id)
+      .in('status', ['draft', 'revision_requested'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (exErr) {
+      throwFromPostgrest(exErr, 'BOOKING_LOOKUP_FAILED');
+    }
+    if (existing) {
+      return existing as Record<string, unknown>;
+    }
+
     const { data: unit, error: uErr } = await this.admin()
       .from('units')
       .select('id, status, is_blocked, project_id')
