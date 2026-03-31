@@ -309,6 +309,9 @@ export class BookingsService {
       form_template_id: dto.form_template_id,
       agreement_template_id: dto.agreement_template_id,
       joint_allottees: dto.joint_allottees ?? null,
+      // DB constraint: field_snapshot is NOT NULL in some deployments.
+      // Initialize to empty object; the submit RPC can later populate/refresh it.
+      field_snapshot: {},
       allottee_address:
         dto.allottee_address ??
         '12 Test Road, Indiranagar, Bengaluru 560038',
@@ -398,6 +401,18 @@ export class BookingsService {
         error: 'FORBIDDEN',
       });
     }
+
+    // Defensive backfill for older rows created before field_snapshot became NOT NULL.
+    if (booking.field_snapshot == null) {
+      const { error: snapErr } = await this.admin()
+        .from('bookings')
+        .update({ field_snapshot: {}, updated_at: new Date().toISOString() })
+        .eq('id', bookingId);
+      if (snapErr) {
+        throwFromPostgrest(snapErr, 'BOOKING_UPDATE_FAILED');
+      }
+    }
+
     const data = await this.rpcAsUser<unknown>(accessToken, 'submit_booking', {
       p_booking_id: bookingId,
     });
