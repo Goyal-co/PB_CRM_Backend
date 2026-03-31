@@ -72,8 +72,14 @@ export class UnitsService {
     }
     if (user.role === 'user') {
       qb = qb.eq('status', 'available');
+      // Users should never see inventory that is temporarily blocked.
+      qb = qb.neq('is_blocked', true);
     } else if (q.status) {
       qb = qb.eq('status', q.status);
+      // When filtering to "available", hide rows explicitly blocked by ops.
+      if (q.status === 'available') {
+        qb = qb.neq('is_blocked', true);
+      }
     }
     const { data, error, count } = await qb
       .order('tower', { ascending: true })
