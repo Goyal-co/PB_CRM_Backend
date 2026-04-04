@@ -13,6 +13,12 @@ import { BookingStatus } from '@common/types/supabase.types';
 import { getBookingForUser } from '@common/utils/access.util';
 import { assertBookingStatusTransition } from '@common/utils/booking-status.util';
 import { throwFromPostgrest, mapRpcError } from '@common/utils/supabase-errors';
+import {
+  buildAgreementParamMap,
+  mergeAgreementPlaceholders,
+  wrapAgreementHtmlDocument,
+} from '@common/utils/agreement-merge.util';
+import { renderHtmlToPdfBuffer } from '@common/utils/agreement-pdf.util';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { ReviewFieldDto } from './dto/review-field.dto';
@@ -550,12 +556,12 @@ export class BookingsService {
   }
 
   /**
-   * Returns merged agreement HTML for approved bookings.
+   * Returns merged agreement HTML for approved bookings (template + booking/unit/project/profile + field_snapshot).
    */
   async mergedAgreement(
     user: CurrentUser,
     bookingId: string,
-    accessToken: string,
+    _accessToken: string,
   ): Promise<unknown> {
     if (user.role === 'user') {
       throw new ForbiddenException({
@@ -570,9 +576,165 @@ export class BookingsService {
         error: 'BOOKING_NOT_APPROVED',
       });
     }
-    return this.rpcAsUser<unknown>(accessToken, 'get_merged_agreement', {
-      p_booking_id: bookingId,
+    return this.buildMergedAgreementPayload(bookingId, booking);
+  }
+
+  /**
+   * Merged agreement as HTML bytes (`?format=html` download).
+   */
+  async agreementDownloadHtml(
+    user: CurrentUser,
+    bookingId: string,
+  ): Promise<Buffer> {
+    const { html } = await this.agreementDownloadContext(user, bookingId);
+    return Buffer.from(html, 'utf-8');
+  }
+
+  /**
+   * Merged agreement as PDF (default download).
+   */
+  async agreementDownloadPdf(
+    user: CurrentUser,
+    bookingId: string,
+  ): Promise<Buffer> {
+    const { html, pdfCacheKey } = await this.agreementDownloadContext(
+      user,
+      bookingId,
+    );
+    return renderHtmlToPdfBuffer(html, { cacheKey: pdfCacheKey });
+  }
+
+  /**
+   * Shared validation + merge for agreement downloads (HTML / PDF).
+   */
+  private async agreementDownloadContext(
+    user: CurrentUser,
+    bookingId: string,
+  ): Promise<{ html: string; pdfCacheKey: string }> {
+    if (user.role === 'user') {
+      throw new ForbiddenException({
+        message: 'Managers only',
+        error: 'FORBIDDEN',
+      });
+    }
+    const booking = await this.findOne(user, bookingId);
+    if ((booking.status as string) !== 'approved') {
+      throw new UnprocessableEntityException({
+        message: 'Booking must be approved',
+        error: 'BOOKING_NOT_APPROVED',
+      });
+    }
+    const payload = (await this.buildMergedAgreementPayload(
+      bookingId,
+      booking,
+    )) as {
+      merged_html: string;
+      header_html?: string | null;
+      footer_html?: string | null;
+    };
+    const html = wrapAgreementHtmlDocument({
+      header_html: payload.header_html,
+      body_html: payload.merged_html,
+      footer_html: payload.footer_html,
     });
+    const pdfCacheKey = [
+      'v1',
+      bookingId,
+      String(
+        (booking as { updated_at?: string | null }).updated_at ??
+          (booking as { created_at?: string | null }).created_at ??
+          '',
+      ),
+      String(booking.agreement_template_id ?? ''),
+    ].join(':');
+    return { html, pdfCacheKey };
+  }
+
+  private async buildMergedAgreementPayload(
+    bookingId: string,
+    booking: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const templateId = booking.agreement_template_id as string | undefined;
+    if (!templateId) {
+      throw new UnprocessableEntityException({
+        message: 'Booking has no agreement template',
+        error: 'AGREEMENT_TEMPLATE_MISSING',
+      });
+    }
+
+    const unitId = booking.unit_id as string;
+    const projectId = booking.project_id as string;
+    const userId = booking.user_id as string;
+
+    const [templateResult, unitRes, projectRes, profileRes] = await Promise.all(
+      [
+        this.admin()
+          .from('agreement_templates')
+          .select('*')
+          .eq('id', templateId)
+          .maybeSingle(),
+        this.admin().from('units').select('*').eq('id', unitId).maybeSingle(),
+        this.admin()
+          .from('projects')
+          .select('*')
+          .eq('id', projectId)
+          .maybeSingle(),
+        this.admin()
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle(),
+      ],
+    );
+
+    const { data: template, error: tErr } = templateResult;
+    if (tErr) {
+      throwFromPostgrest(tErr, 'AGREEMENT_TEMPLATE_LOAD_FAILED');
+    }
+    if (!template) {
+      throw new NotFoundException({
+        message: 'Agreement template not found',
+        error: 'AGREEMENT_TEMPLATE_NOT_FOUND',
+      });
+    }
+    if (unitRes.error) {
+      throwFromPostgrest(unitRes.error, 'UNIT_LOAD_FAILED');
+    }
+    if (projectRes.error) {
+      throwFromPostgrest(projectRes.error, 'PROJECT_LOAD_FAILED');
+    }
+    if (profileRes.error) {
+      throwFromPostgrest(profileRes.error, 'PROFILE_LOAD_FAILED');
+    }
+
+    const params = buildAgreementParamMap({
+      booking,
+      unit: unitRes.data as Record<string, unknown> | null,
+      project: projectRes.data as Record<string, unknown> | null,
+      profile: profileRes.data as Record<string, unknown> | null,
+    });
+
+    const t = template as Record<string, unknown>;
+    const bodyHtml = mergeAgreementPlaceholders(String(t.body_html ?? ''), params);
+    const headerRaw = t.header_html as string | null | undefined;
+    const footerRaw = t.footer_html as string | null | undefined;
+
+    return {
+      booking_id: bookingId,
+      agreement_template_id: templateId,
+      merged_html: bodyHtml,
+      header_html: headerRaw
+        ? mergeAgreementPlaceholders(headerRaw, params)
+        : null,
+      footer_html: footerRaw
+        ? mergeAgreementPlaceholders(footerRaw, params)
+        : null,
+      page_size: t.page_size ?? 'A4',
+      margin_top: t.margin_top ?? null,
+      margin_bottom: t.margin_bottom ?? null,
+      margin_left: t.margin_left ?? null,
+      margin_right: t.margin_right ?? null,
+    };
   }
 
   /**

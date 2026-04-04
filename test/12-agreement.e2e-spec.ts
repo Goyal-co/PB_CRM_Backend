@@ -41,6 +41,40 @@ describe('12 Agreement merge & record (e2e)', () => {
     assertSuccess(res);
   });
 
+  it(
+    'downloads merged agreement as PDF (default)',
+    async () => {
+      const res = await api(state.managerToken).getBuffer(
+        `/bookings/${state.approvedBookingId}/agreement-download`,
+      );
+      expect(res.status).toBe(200);
+      expect(String(res.headers['content-type'] ?? '')).toMatch(
+        /application\/pdf/i,
+      );
+      expect(String(res.headers['content-disposition'] ?? '')).toMatch(
+        /\.pdf/i,
+      );
+      const body = res.body as Buffer;
+      expect(Buffer.isBuffer(body)).toBe(true);
+      expect(body.subarray(0, 4).toString('latin1')).toBe('%PDF');
+    },
+    300_000,
+  );
+
+  it('downloads merged agreement HTML when format=html', async () => {
+    const res = await api(state.managerToken).get(
+      `/bookings/${state.approvedBookingId}/agreement-download?format=html`,
+    );
+    expect(res.status).toBe(200);
+    expect(String(res.headers['content-type'] ?? '')).toMatch(/text\/html/i);
+    expect(String(res.headers['content-disposition'] ?? '')).toMatch(
+      /attachment/i,
+    );
+    const body = String(res.text ?? '');
+    expect(body).toContain('<!DOCTYPE html>');
+    expect(body).not.toContain('{{allottee_full_name}}');
+  });
+
   it('records agreement document as manager', async () => {
     const res = await api(state.managerToken).post(
       `/bookings/${state.approvedBookingId}/record-agreement`,

@@ -41,6 +41,22 @@ export function api(token: string) {
       request(BASE_URL)
         .get(`${API}${path}`)
         .set('Authorization', `Bearer ${token}`),
+    /** Binary responses (e.g. PDF) without corrupting the body. */
+    getBuffer: (path: string) =>
+      request(BASE_URL)
+        .get(`${API}${path}`)
+        .set('Authorization', `Bearer ${token}`)
+        .buffer(true)
+        .parse((res, callback) => {
+          const chunks: Buffer[] = [];
+          res.on('data', (chunk: Buffer) => {
+            chunks.push(Buffer.from(chunk));
+          });
+          res.on('end', () => {
+            callback(null, Buffer.concat(chunks));
+          });
+          res.on('error', callback);
+        }),
     post: (path: string, body?: object) =>
       request(BASE_URL)
         .post(`${API}${path}`)

@@ -12,6 +12,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { createAppValidationPipe } from './common/pipes/validation.pipe';
+import { warmAgreementPdfEngine } from './common/utils/agreement-pdf.util';
 
 async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({ logger: true });
@@ -78,6 +79,7 @@ async function bootstrap(): Promise<void> {
 
   const port = configService.get<number>('app.port', { infer: true }) ?? 3000;
   await app.listen(port, '0.0.0.0');
+  void warmAgreementPdfEngine();
 }
 
 void bootstrap();

@@ -728,6 +728,11 @@ const collection = {
         }),
         req('Get booking form payload', 'GET', `/bookings/${P.bookingId}/form`),
         req('Merged agreement HTML', 'GET', `/bookings/${P.bookingId}/merged-agreement`),
+        req(
+          'Download merged agreement (PDF; ?format=html for HTML)',
+          'GET',
+          `/bookings/${P.bookingId}/agreement-download`,
+        ),
         req('Submit booking', 'POST', `/bookings/${P.bookingId}/submit`),
         req('Start review', 'POST', `/bookings/${P.bookingId}/start-review`),
         req('Review field', 'PATCH', `/bookings/${P.bookingId}/review-field`, {

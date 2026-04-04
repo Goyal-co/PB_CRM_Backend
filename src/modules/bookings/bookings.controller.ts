@@ -9,11 +9,13 @@ import {
   Post,
   Query,
   Req,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -109,6 +111,42 @@ export class BookingsController {
     @Param('id') id: string,
   ): Promise<unknown> {
     return this.service.mergedAgreement(user, id, req.accessToken!);
+  }
+
+  @Get(':id/agreement-download')
+  @UseGuards(RolesGuard)
+  @Roles('super_admin', 'manager')
+  @ApiQuery({
+    name: 'format',
+    required: false,
+    enum: ['pdf', 'html'],
+    description: 'Defaults to pdf. Use html for a raw HTML file instead.',
+  })
+  @ApiOperation({
+    summary: 'Download merged agreement as PDF',
+    description:
+      'Returns application/pdf by default (headless Chromium). Pass ?format=html for an HTML attachment.',
+  })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 503, description: 'PDF engine unavailable' })
+  async agreementDownload(
+    @CurrentUser() user: CurrentUserType,
+    @Param('id') id: string,
+    @Query('format') format?: string,
+  ): Promise<StreamableFile> {
+    const wantHtml = format?.toLowerCase() === 'html';
+    if (wantHtml) {
+      const buf = await this.service.agreementDownloadHtml(user, id);
+      return new StreamableFile(buf, {
+        type: 'text/html; charset=utf-8',
+        disposition: `attachment; filename="agreement-${id}.html"`,
+      });
+    }
+    const buf = await this.service.agreementDownloadPdf(user, id);
+    return new StreamableFile(buf, {
+      type: 'application/pdf',
+      disposition: `attachment; filename="agreement-${id}.pdf"`,
+    });
   }
 
   @Post(':id/submit')
