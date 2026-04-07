@@ -106,10 +106,15 @@ export function wrapAgreementHtmlDocument(parts: {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Agreement</title>
+<style>
+  /* Many legacy templates are PDF→HTML dumps with position:absolute spans.
+     Wrap them in a positioned container so they don't overlap injected headers. */
+  .agreement-body-root { position: relative; }
+</style>
 </head>
 <body>
 ${h}
-${b}
+<div class="agreement-body-root">${b}</div>
 ${f}
 </body>
 </html>`;
@@ -291,16 +296,36 @@ export function fillCommonAgreementBlanksFromParams(
     /(\(\s*Aadhar\s*no\.?\s*)(_{4,})(\s*\))/gi,
     aadhar,
   );
+  // Some PDF→HTML dumps remove spaces: "(Aadharno._____)".
+  out = fillUnderscoreBlank(
+    out,
+    /(\(\s*Aadhar\s*no\.?\s*)(_{4,})(\s*\))/gi,
+    aadhar,
+  );
   out = fillUnderscoreBlank(
     out,
     /(\(\s*PAN\s*)(_{4,})(\s*\))/gi,
     pan,
   );
+  // "PAN________" (no parentheses)
+  out = fillUnderscoreBlank(out, /(PAN\s*)(_{4,})/gi, pan);
   out = fillUnderscoreBlank(
     out,
     /(son\/daughter\s*of\s*)(_{4,})(,?)/gi,
     father,
   );
+  // "son/daughterof____" (no spaces)
+  out = fillUnderscoreBlank(
+    out,
+    /(son\/daughter\s*of\s*)(_{4,})(,?)/gi,
+    father,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(residing\s*at\s*)(_{4,})(,?)/gi,
+    address,
+  );
+  // "residingat____" (no spaces)
   out = fillUnderscoreBlank(
     out,
     /(residing\s*at\s*)(_{4,})(,?)/gi,
