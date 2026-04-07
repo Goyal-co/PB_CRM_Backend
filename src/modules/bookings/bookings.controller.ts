@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FastifyReply } from 'fastify';
 import { FastifyRequest } from 'fastify';
 import { Roles } from '@common/decorators/roles.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -147,6 +149,40 @@ export class BookingsController {
       type: 'application/pdf',
       disposition: `attachment; filename="agreement-${id}.pdf"`,
     });
+  }
+
+  @Get(':id/agreement-download-url')
+  @UseGuards(RolesGuard)
+  @Roles('super_admin', 'manager')
+  @ApiQuery({
+    name: 'async',
+    required: false,
+    description:
+      'If true and no cached PDF exists yet, triggers generation in background and returns 202.',
+  })
+  @ApiOperation({
+    summary: 'Get signed URL for cached agreement PDF',
+    description:
+      'Fast path for managers: returns a signed Supabase Storage URL when PDF is cached. If not cached, optionally triggers background generation.',
+  })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 202, description: 'Generation triggered; try again soon' })
+  async agreementDownloadUrl(
+    @CurrentUser() user: CurrentUserType,
+    @Param('id') id: string,
+    @Query('async') asyncFlag?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
+  ): Promise<unknown> {
+    const asyncMode =
+      asyncFlag === '1' || asyncFlag?.toLowerCase() === 'true';
+    const res = await this.service.agreementDownloadPdfUrl(user, id, {
+      async: asyncMode,
+    });
+    if (!res.cached && asyncMode) {
+      // Return a real 202 so clients can distinguish "not ready yet".
+      reply?.status(202);
+    }
+    return res;
   }
 
   @Post(':id/submit')

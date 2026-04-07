@@ -975,6 +975,14 @@ curl -sX GET "http://localhost:3000/api/v1/projects?page=1&limit=20" \
   -H "Authorization: Bearer <access_token>"
 ```
 
+### Downloading PDFs safely (avoid saving JSON errors as `.pdf`)
+When downloading the agreement PDF, use `curl.exe -f` (Windows) so the command fails on HTTP 4xx/5xx instead of saving an error JSON payload into a `.pdf` file:
+
+```bash
+curl.exe -f -L -o "agreement.pdf" "http://localhost:3000/api/v1/bookings/<booking_uuid>/agreement-download" ^
+  -H "Authorization: Bearer <access_token>"
+```
+
 ### Document upload (multipart)
 ```bash
 curl -sX POST "http://localhost:3000/api/v1/documents/upload" \

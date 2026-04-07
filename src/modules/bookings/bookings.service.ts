@@ -15,7 +15,10 @@ import { assertBookingStatusTransition } from '@common/utils/booking-status.util
 import { throwFromPostgrest, mapRpcError } from '@common/utils/supabase-errors';
 import {
   buildAgreementParamMap,
+  compactAgreementHtml,
+  buildAgreementDetailsHeaderHtml,
   mergeAgreementPlaceholders,
+  shouldInjectAgreementDetailsHeader,
   wrapAgreementHtmlDocument,
 } from '@common/utils/agreement-merge.util';
 import { renderHtmlToPdfBuffer } from '@common/utils/agreement-pdf.util';
@@ -37,6 +40,8 @@ export class BookingsService {
     private readonly notifications: NotificationsService,
     private readonly documents: DocumentsService,
   ) {}
+
+  private readonly agreementPdfInFlight = new Set<string>();
 
   private admin() {
     return this.supabase.supabaseAdmin;
@@ -553,6 +558,10 @@ export class BookingsService {
         body: 'Your booking has been approved.',
         action_url: `/bookings/${bookingId}`,
       });
+
+      // Pre-generate and cache the PDF in the background so manager actions feel instant.
+      // This should not block the approval response.
+      void this.agreementGenerateAndCachePdf(user, bookingId);
     }
     return data;
   }
@@ -651,6 +660,66 @@ export class BookingsService {
     return pdf;
   }
 
+  async agreementDownloadPdfUrl(
+    user: CurrentUser,
+    bookingId: string,
+    opts?: { async?: boolean },
+  ): Promise<{ cached: boolean; url: string | null; expires_at: string | null }> {
+    // reuse the same auth rules as downloads (manager-only + approved booking)
+    await this.agreementDownloadContext(user, bookingId);
+
+    const useStorageCache =
+      process.env.AGREEMENT_DOWNLOAD_USE_STORAGE_CACHE !== '0';
+    if (!useStorageCache) {
+      return { cached: false, url: null, expires_at: null };
+    }
+
+    const existing = await this.admin()
+      .from('documents')
+      .select('storage_path')
+      .eq('booking_id', bookingId)
+      .eq('type', 'agreement_for_sale')
+      .eq('is_latest_version', true)
+      .maybeSingle();
+
+    if (existing.data?.storage_path) {
+      const signed = await this.admin().storage
+        .from('agreements')
+        .createSignedUrl(existing.data.storage_path as string, 3600);
+      const url = signed.data?.signedUrl ?? null;
+      const expires_at = url
+        ? new Date(Date.now() + 3600 * 1000).toISOString()
+        : null;
+      return { cached: Boolean(url), url, expires_at };
+    }
+
+    if (opts?.async) {
+      // fire-and-forget generation + upload; user can poll this endpoint.
+      void this.agreementGenerateAndCachePdf(user, bookingId);
+    }
+
+    return { cached: false, url: null, expires_at: null };
+  }
+
+  private async agreementGenerateAndCachePdf(
+    user: CurrentUser,
+    bookingId: string,
+  ): Promise<void> {
+    if (this.agreementPdfInFlight.has(bookingId)) {
+      return;
+    }
+    this.agreementPdfInFlight.add(bookingId);
+    try {
+      const pdf = await this.agreementDownloadPdf(user, bookingId);
+      // agreementDownloadPdf already uploads to storage when enabled
+      void pdf;
+    } catch {
+      // ignore: download endpoint will continue to serve HTML; PDF caching will be retried later
+    } finally {
+      this.agreementPdfInFlight.delete(bookingId);
+    }
+  }
+
   /**
    * Shared validation + merge for agreement downloads (HTML / PDF).
    */
@@ -679,11 +748,13 @@ export class BookingsService {
       header_html?: string | null;
       footer_html?: string | null;
     };
-    const html = wrapAgreementHtmlDocument({
+    const html = compactAgreementHtml(
+      wrapAgreementHtmlDocument({
       header_html: payload.header_html,
       body_html: payload.merged_html,
       footer_html: payload.footer_html,
-    });
+    }),
+    );
     const pdfCacheKey = [
       'v1',
       bookingId,
@@ -766,13 +837,21 @@ export class BookingsService {
     const headerRaw = t.header_html as string | null | undefined;
     const footerRaw = t.footer_html as string | null | undefined;
 
+    const wantDetailsHeader =
+      process.env.AGREEMENT_DETAILS_HEADER !== '0' &&
+      shouldInjectAgreementDetailsHeader(bodyHtml, params);
+    const detailsHeader = wantDetailsHeader
+      ? buildAgreementDetailsHeaderHtml({ ...params, booking_id: bookingId })
+      : '';
+
     return {
       booking_id: bookingId,
       agreement_template_id: templateId,
       merged_html: bodyHtml,
-      header_html: headerRaw
-        ? mergeAgreementPlaceholders(headerRaw, params)
-        : null,
+      header_html:
+        `${detailsHeader}${
+          headerRaw ? mergeAgreementPlaceholders(headerRaw, params) : ''
+        }` || null,
       footer_html: footerRaw
         ? mergeAgreementPlaceholders(footerRaw, params)
         : null,
