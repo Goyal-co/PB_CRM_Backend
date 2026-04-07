@@ -237,6 +237,145 @@ export function shouldInjectAgreementDetailsHeader(
   return false;
 }
 
+function fillUnderscoreBlank(
+  html: string,
+  pattern: RegExp,
+  value: string,
+): string {
+  if (!value?.trim()) {
+    return html;
+  }
+  return html.replace(pattern, (_m, prefix: string, suffix: string) => {
+    return `${prefix}${escapeHtml(value.trim())}${suffix}`;
+  });
+}
+
+/**
+ * Heuristic filler for PDF→HTML templates that contain underscore blanks instead of placeholders.
+ * This cannot be perfect, but it fixes the most common blanks (name, Aadhaar, PAN, address, etc.).
+ */
+export function fillCommonAgreementBlanksFromParams(
+  mergedHtml: string,
+  params: Record<string, string>,
+): string {
+  let out = mergedHtml;
+
+  const name = pick(params, ['allottee_full_name', 'customer_name', 'name']);
+  const aadhar = pick(params, ['aadhar_no', 'aadhaar_no', 'allottee_aadhar']);
+  const pan = pick(params, ['pan', 'pan_no', 'allottee_pan']);
+  const father = pick(params, ['father_name', 'allottee_father_name']);
+  const address = pick(params, ['address', 'residential_address', 'allottee_address']);
+
+  const appNo = pick(params, ['application_no', 'application_number']);
+  const appDate = pick(params, ['application_date', 'application_dt']);
+  const aptNo = pick(params, ['apartment_no', 'unit_no', 'unit_number', 'flat_no']);
+  const carpet = pick(params, ['carpet_area', 'carpet_area_sqft']);
+  const sba = pick(params, ['super_built_up_area', 'super_builtup_area', 'sba_sqft']);
+  const floor = pick(params, ['floor', 'floor_no']);
+  const tower = pick(params, ['tower', 'tower_no', 'tower_name']);
+  const aptType = pick(params, ['apartment_type', 'unit_type', 'bhk_type']);
+  const carParks = pick(params, ['car_parking', 'car_parking_nos', 'car_parking_count']);
+
+  const totalPrice = pick(params, ['total_price', 'agreement_total_price', 'gross_amount']);
+  const reraReg = pick(params, ['rera_registration_no', 'rera_no', 'project_rera']);
+  const website = pick(params, ['project_website', 'website']);
+
+  // MR/MS line + identifiers
+  out = fillUnderscoreBlank(
+    out,
+    /(MR\.?\s*\/\s*MS\.?\s*)(_{4,})(,?)/gi,
+    name,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(\(\s*Aadhar\s*no\.?\s*)(_{4,})(\s*\))/gi,
+    aadhar,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(\(\s*PAN\s*)(_{4,})(\s*\))/gi,
+    pan,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(son\/daughter\s*of\s*)(_{4,})(,?)/gi,
+    father,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(residing\s*at\s*)(_{4,})(,?)/gi,
+    address,
+  );
+
+  // RERA + website lines
+  out = fillUnderscoreBlank(
+    out,
+    /(Registration\s*No\.?\s*)(_{4,})(\s*)/gi,
+    reraReg,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(website\s*for\s*the\s*Project\s*is\s*)(_{4,})(;?)/gi,
+    website,
+  );
+
+  // Application/allotment sentence (Recital M)
+  out = fillUnderscoreBlank(
+    out,
+    /(application\s*no\.?\s*)(_{3,})(\s*dated)/gi,
+    appNo,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(dated\s*)(_{3,})(\s*and\s*has\s*been\s*allotted)/gi,
+    appDate,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(apartment\s*no\.?\s*)(_{3,})(\s*having)/gi,
+    aptNo,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(carpet\s*area\s*of\s*)(_{3,})(\s*square\s*feet)/gi,
+    carpet,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(\s*and\s*)(_{3,})(\s*square\s*feet\s*of\s*super\s*built\s*up\s*area)/gi,
+    sba,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(being\s*)(_{3,})(\s*type\s*of\s*the\s*apartment)/gi,
+    aptType,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(located\s*on\s*)(_{3,})(\s*floor)/gi,
+    floor,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(in\s*Tower\s*no\.?\s*)(_{1,})(\s*of\s*the\s*Project)/gi,
+    tower,
+  );
+  out = fillUnderscoreBlank(
+    out,
+    /(along\s*with\s*)(_{1,})(\s*\(nos\)\s*of\s*car\s*parking)/gi,
+    carParks,
+  );
+
+  // Total price section
+  out = fillUnderscoreBlank(
+    out,
+    /(TotalPrice\s*fortheSchedulePropertyis\s*Rs\.?\s*)(_{3,})(\s*\/\-)/gi,
+    totalPrice,
+  );
+
+  return out;
+}
+
 /**
  * Lightweight HTML compaction to reduce transfer size and speed up rendering.
  * Intentionally conservative: removes comments and collapses obvious whitespace.

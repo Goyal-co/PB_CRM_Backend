@@ -18,6 +18,7 @@ import {
   buildAgreementFormDetailsHtml,
   compactAgreementHtml,
   buildAgreementDetailsHeaderHtml,
+  fillCommonAgreementBlanksFromParams,
   mergeAgreementPlaceholders,
   shouldInjectAgreementDetailsHeader,
   wrapAgreementHtmlDocument,
@@ -834,7 +835,11 @@ export class BookingsService {
     });
 
     const t = template as Record<string, unknown>;
-    const bodyHtml = mergeAgreementPlaceholders(String(t.body_html ?? ''), params);
+    const mergedBody = mergeAgreementPlaceholders(String(t.body_html ?? ''), params);
+    const bodyHtml = fillCommonAgreementBlanksFromParams(mergedBody, {
+      ...params,
+      booking_id: bookingId,
+    });
     const headerRaw = t.header_html as string | null | undefined;
     const footerRaw = t.footer_html as string | null | undefined;
 
