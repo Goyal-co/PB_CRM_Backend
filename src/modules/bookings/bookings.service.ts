@@ -15,6 +15,7 @@ import { assertBookingStatusTransition } from '@common/utils/booking-status.util
 import { throwFromPostgrest, mapRpcError } from '@common/utils/supabase-errors';
 import {
   buildAgreementParamMap,
+  buildAgreementFormDetailsHtml,
   compactAgreementHtml,
   buildAgreementDetailsHeaderHtml,
   mergeAgreementPlaceholders,
@@ -837,6 +838,25 @@ export class BookingsService {
     const headerRaw = t.header_html as string | null | undefined;
     const footerRaw = t.footer_html as string | null | undefined;
 
+    const snap = booking.field_snapshot;
+    const formDetails =
+      process.env.AGREEMENT_FORM_DETAILS !== '0'
+        ? buildAgreementFormDetailsHtml({
+            snapshot: snap,
+            excludeKeys: [
+              // avoid duplicating common header fields if they exist in snapshot
+              'allottee_full_name',
+              'customer_name',
+              'unit_no',
+              'unit_number',
+              'apartment_no',
+              'phone',
+              'mobile',
+              'email',
+            ],
+          })
+        : '';
+
     const wantDetailsHeader =
       process.env.AGREEMENT_DETAILS_HEADER !== '0' &&
       shouldInjectAgreementDetailsHeader(bodyHtml, params);
@@ -849,7 +869,7 @@ export class BookingsService {
       agreement_template_id: templateId,
       merged_html: bodyHtml,
       header_html:
-        `${detailsHeader}${
+        `${detailsHeader}${formDetails}${
           headerRaw ? mergeAgreementPlaceholders(headerRaw, params) : ''
         }` || null,
       footer_html: footerRaw

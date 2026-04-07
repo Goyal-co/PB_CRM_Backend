@@ -134,6 +134,55 @@ function pick(params: Record<string, string>, keys: string[]): string {
   return '';
 }
 
+function titleizeKey(k: string): string {
+  return k
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+export function buildAgreementFormDetailsHtml(input: {
+  snapshot: unknown;
+  includeEmpty?: boolean;
+  excludeKeys?: string[];
+}): string {
+  const { snapshot, includeEmpty = false } = input;
+  const exclude = new Set((input.excludeKeys ?? []).map((x) => x.toLowerCase()));
+
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+    return '';
+  }
+
+  const entries = Object.entries(snapshot as Record<string, unknown>)
+    .filter(([k]) => !exclude.has(k.toLowerCase()))
+    .map(([k, v]) => [k, stringifyPrimitive(v)] as const)
+    .filter(([, v]) => includeEmpty || Boolean(v.trim()));
+
+  if (entries.length === 0) {
+    return '';
+  }
+
+  entries.sort(([a], [b]) => a.localeCompare(b));
+
+  const trs = entries
+    .map(([k, v]) => {
+      const label = titleizeKey(k);
+      return `<tr>
+  <td style="padding:4px 8px;color:#555;vertical-align:top;white-space:nowrap;">${escapeHtml(
+    label,
+  )}</td>
+  <td style="padding:4px 8px;font-weight:600;">${escapeHtml(v)}</td>
+</tr>`;
+    })
+    .join('');
+
+  return `<div style="font-family:Arial, sans-serif;margin:0 0 12px 0;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;">
+  <div style="font-size:12px;font-weight:700;margin:0 0 6px 0;">Form details</div>
+  <table style="border-collapse:collapse;font-size:11px;width:100%;">${trs}</table>
+</div>`;
+}
+
 /**
  * Some templates in the wild are PDF-to-HTML dumps (absolute-position spans) with no placeholders,
  * and \"blank\" areas cannot be reliably filled. This header guarantees key booking details appear.
