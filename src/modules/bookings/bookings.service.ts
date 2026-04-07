@@ -19,6 +19,7 @@ import {
   wrapAgreementHtmlDocument,
 } from '@common/utils/agreement-merge.util';
 import { renderHtmlToPdfBuffer } from '@common/utils/agreement-pdf.util';
+import { DocumentsService } from '../documents/documents.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { ReviewFieldDto } from './dto/review-field.dto';
@@ -34,6 +35,7 @@ export class BookingsService {
   constructor(
     private readonly supabase: SupabaseService,
     private readonly notifications: NotificationsService,
+    private readonly documents: DocumentsService,
   ) {}
 
   private admin() {
@@ -597,11 +599,56 @@ export class BookingsService {
     user: CurrentUser,
     bookingId: string,
   ): Promise<Buffer> {
+    const useStorageCache =
+      process.env.AGREEMENT_DOWNLOAD_USE_STORAGE_CACHE !== '0';
+
+    if (useStorageCache) {
+      const existing = await this.admin()
+        .from('documents')
+        .select('storage_path, mime_type')
+        .eq('booking_id', bookingId)
+        .eq('type', 'agreement_for_sale')
+        .eq('is_latest_version', true)
+        .maybeSingle();
+      if (existing.data?.storage_path) {
+        const signed = await this.admin().storage
+          .from('agreements')
+          .createSignedUrl(existing.data.storage_path as string, 3600);
+        const url = signed.data?.signedUrl;
+        if (url) {
+          const r = await fetch(url);
+          if (r.ok) {
+            const ab = await r.arrayBuffer();
+            const buf = Buffer.from(ab);
+            if (buf.length >= 5 && buf.subarray(0, 4).toString('latin1') === '%PDF') {
+              return buf;
+            }
+          }
+        }
+      }
+    }
+
     const { html, pdfCacheKey } = await this.agreementDownloadContext(
       user,
       bookingId,
     );
-    return renderHtmlToPdfBuffer(html, { cacheKey: pdfCacheKey });
+    const pdf = await renderHtmlToPdfBuffer(html, { cacheKey: pdfCacheKey });
+
+    if (useStorageCache) {
+      // Store the generated PDF so future downloads are fast and don't require a PDF engine.
+      await this.documents.handleUpload({
+        user,
+        bookingId,
+        type: 'agreement_for_sale',
+        buffer: pdf,
+        filename: `agreement-${bookingId}.pdf`,
+        mime: 'application/pdf',
+        allotteeIndex: 0,
+        notes: 'auto-generated',
+      });
+    }
+
+    return pdf;
   }
 
   /**
