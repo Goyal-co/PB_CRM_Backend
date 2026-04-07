@@ -844,10 +844,17 @@ export class BookingsService {
     const footerRaw = t.footer_html as string | null | undefined;
 
     const snap = booking.field_snapshot;
+    const snapIsEmptyObject =
+      !!snap && typeof snap === 'object' && !Array.isArray(snap)
+        ? Object.keys(snap as object).length === 0
+        : true;
+    // If dynamic form values were not persisted into booking_field_values (snapshot is {}),
+    // fall back to booking scalars so agreement still auto-fills what we *do* have.
+    const snapshotForDetails = snapIsEmptyObject ? booking : snap;
     const formDetails =
       process.env.AGREEMENT_FORM_DETAILS !== '0'
         ? buildAgreementFormDetailsHtml({
-            snapshot: snap,
+            snapshot: snapshotForDetails,
             excludeKeys: [
               // avoid duplicating common header fields if they exist in snapshot
               'allottee_full_name',
